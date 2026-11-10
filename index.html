@@ -347,6 +347,10 @@ body::before{background:#312e81}
 .blabels span.sel{color:var(--ink);font-weight:800}
 .pcard .big small{display:block;font-size:.72rem;margin-top:2px;text-align:right;white-space:nowrap}
 .toast{background:var(--hero);color:#fff;box-shadow:var(--shadow)}
+.acct{display:flex;align-items:center;gap:10px;font-size:.82rem;color:var(--leaf-ink)}
+.acct span{opacity:.85}.acct span.warn{color:#ffd9a8;opacity:1;font-weight:700}
+.acct button{background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.3);color:#fff;border-radius:999px;padding:6px 14px;font-weight:600;font-size:.85rem}
+.acct button:hover{background:rgba(255,255,255,.24)}
 </style>
 
 <header class="hero">
@@ -362,6 +366,7 @@ body::before{background:#312e81}
       <span id="weekLabel">Week</span>
       <button id="nextWeek" aria-label="Next week">›</button>
     </div>
+    <div class="acct" id="acct" hidden><span id="syncState" aria-live="polite"></span><button id="logout">Log out</button></div>
   </div>
 </header>
 <nav class="tabs" aria-label="Sections">
@@ -720,15 +725,15 @@ const fgoal=p=>+p.ftarget>0?+p.ftarget:fiberGoal(p).g;
 /* ---------- State ---------- */
 const LS='vaaram.v1';
 let S=load();
-function load(){
-  let s=null;try{s=JSON.parse(localStorage.getItem(LS))}catch(e){}
+function load(raw){
+  let s=raw||null;if(!s)try{s=JSON.parse(localStorage.getItem(LS))}catch(e){}
   if(!s||!s.people) s={people:DEFAULT_PEOPLE,set:{eggs:true,nonveg:0,vEggs:true,vEggsInList:true,kidsMilk:true},weeks:{},tab:'plan',week:0,day:null,pantry:[]};
   s.people=s.people.map(p=>{if(p.age!=null)return p;const d=DEFAULT_PEOPLE.find(x=>x.id===p.id)||{};
     const q={...d,...p,age:d.age,sex:d.sex,weight:d.weight,activity:d.activity,eggs:p.id==='p1'?(s.set.vEggs!==false):!!d.eggs,milk:(p.id==='p4'||p.id==='p5')?(s.set.kidsMilk!==false):!!d.milk};q.basis=suggest(q).basis;return q});
   s.custom=s.custom||[];s.customIng=s.customIng||{};s.hidden=s.hidden||[];
   return s;
 }
-function save(){try{localStorage.setItem(LS,JSON.stringify(S))}catch(e){}}
+function save(){try{localStorage.setItem(LS,JSON.stringify(S))}catch(e){}if(SYNC&&SYNC.on)queuePush()}
 
 function monday(offset){
   const t=new Date();t.setHours(0,0,0,0);
@@ -1177,6 +1182,7 @@ async function copy(text,ok){try{await navigator.clipboard.writeText(text);toast
 document.addEventListener('click',e=>{
   const t=e.target.closest('button,td.cell'); if(!t) return;
   if(t.dataset.tab){S.tab=t.dataset.tab;location.hash=t.dataset.tab;render();window.scrollTo({top:0});return}
+  if(t.id==='logout'){if(SYNC.on&&!SYNC.timer){try{localStorage.removeItem(LS)}catch(e){}}if(navigator.serviceWorker&&navigator.serviceWorker.controller)navigator.serviceWorker.controller.postMessage('logout');location.href='/api/logout';return}
   if(t.id==='prevWeek'||t.id==='nextWeek'){S.week+=t.id==='prevWeek'?-1:1;S.day=null;render();return}
   if(t.dataset.day!=null){S.day=+t.dataset.day;render();if(t.tagName==='TD')window.scrollTo({top:0,behavior:'smooth'});return}
   if(t.dataset.swap){const s=t.dataset.swap,w=week(),day=w.plan[S.day];const pool=DISHES.filter(d=>d.slot===s&&allowed(d));if(!pool.length)return;
@@ -1245,7 +1251,53 @@ window.addEventListener('hashchange',()=>{fromHash();render()});
 
 /* Kolam: dots with interlaced loops */
 
-syncCustom();fromHash();render();
+/* ---------- Family sync: on the deployed site, the plan lives in the shared database ---------- */
+var SYNC={on:false,rev:0,last:'',timer:null,busy:false,retry:null};
+const SYNC_KEYS=['people','set','weeks','custom','customIng','hidden','pantry'];
+const pickSync=()=>{const o={};SYNC_KEYS.forEach(k=>o[k]=S[k]);return o};
+function syncLabel(t,cls){const el=$('#syncState');if(el){el.textContent=t;el.className=cls||''}}
+function applyRemote(doc){
+  const ui={tab:S.tab,week:S.week,day:S.day};
+  S=Object.assign(load(JSON.parse(JSON.stringify({...S,...doc.data}))),ui);
+  SYNC.rev=doc.rev;SYNC.last=JSON.stringify(pickSync());
+  syncCustom();render();
+}
+async function syncStart(){
+  if(!CAN_PRINT||(location.protocol!=='https:'&&location.hostname!=='localhost'))return;
+  let r;try{r=await fetch('/api/state',{cache:'no-store'})}catch(e){return}
+  if(r.status===401){location.href='/login.html';return}
+  if(r.status===404)return; // not the Vaaram server
+  $('#acct').hidden=false;
+  if(!r.ok){syncLabel(r.status===503?'Saved on this phone only':'Offline · saved on this phone','warn');return}
+  let doc;try{doc=await r.json()}catch(e){return}
+  SYNC.on=true;
+  if(doc&&doc.data){applyRemote(doc);syncLabel('Synced','ok')}else pushNow();
+  setInterval(pull,30000);
+  document.addEventListener('visibilitychange',()=>{if(!document.hidden)pull()});
+}
+async function pull(){
+  if(!SYNC.on||SYNC.busy||SYNC.timer||document.hidden)return;
+  const a=document.activeElement;if(a&&/^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName))return;
+  try{const r=await fetch('/api/state',{cache:'no-store'});
+    if(r.status===401){location.href='/login.html';return}
+    if(!r.ok)return;const doc=await r.json();
+    if(doc.data&&doc.rev>SYNC.rev){applyRemote(doc);toast('Updated with the latest changes')}}catch(e){}
+}
+function queuePush(){
+  const now=JSON.stringify(pickSync());if(now===SYNC.last)return;
+  clearTimeout(SYNC.timer);syncLabel('Saving…','');SYNC.timer=setTimeout(pushNow,900);
+}
+async function pushNow(){
+  SYNC.timer=null;const body=pickSync(),txt=JSON.stringify(body);SYNC.busy=true;
+  try{const r=await fetch('/api/state',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({data:body})});
+    if(r.status===401){location.href='/login.html';return}
+    if(!r.ok)throw new Error('save failed');
+    const j=await r.json();SYNC.rev=j.rev;SYNC.last=txt;syncLabel('Saved','ok')}
+  catch(e){syncLabel('Not saved yet · retrying','warn');clearTimeout(SYNC.retry);SYNC.retry=setTimeout(queuePush,15000)}
+  finally{SYNC.busy=false}
+}
+
+syncCustom();fromHash();render();syncStart();
 </script>
 <script>if('serviceWorker' in navigator&&location.protocol==='https:'){navigator.serviceWorker.register('sw.js').catch(()=>{})}</script>
 </body>

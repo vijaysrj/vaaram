@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Sign in · Vaaram</title>
+<meta name="theme-color" content="#4f46e5">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icon.svg">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@700;800&family=DM+Sans:wght@400;500;600;700&display=swap">
+<style>
+:root{--bg:#f5f5fa;--surface:#fff;--ink:#16152b;--ink-2:#5f5f7a;--line:#e3e3ee;--leaf:#4f46e5;--chili:#e11d48;--ok:#059669;
+  --hero:linear-gradient(120deg,#312e81 0%,#5b45e0 50%,#ec6a5c 100%);color-scheme:light}
+@media (prefers-color-scheme:dark){:root{--bg:#0e0e1a;--surface:#181829;--ink:#ececf8;--ink-2:#a6a6c4;--line:#2e2e48;--leaf:#6366f1;--chili:#fb7185;--ok:#34d399;
+  --hero:linear-gradient(120deg,#1e1b4b 0%,#3b2fa6 50%,#b4485c 100%);color-scheme:dark}}
+*{box-sizing:border-box}
+body{margin:0;min-height:100dvh;display:grid;place-items:center;padding:24px 16px;background:var(--bg);color:var(--ink);font:15px/1.5 "DM Sans",system-ui,sans-serif}
+.card{width:100%;max-width:380px;background:var(--surface);border:1px solid var(--line);border-radius:24px;overflow:hidden;box-shadow:0 1px 2px rgba(22,21,43,.05),0 20px 40px -20px rgba(49,46,129,.45)}
+.top{background:var(--hero);color:#fff;padding:28px 24px 24px;position:relative;overflow:hidden}
+.top::after{content:"";position:absolute;right:-60px;top:-80px;width:220px;height:220px;border-radius:50%;background:radial-gradient(circle,rgba(255,255,255,.3),transparent 65%)}
+h1{font:800 2rem/1.1 "Plus Jakarta Sans",system-ui,sans-serif;margin:0;letter-spacing:-.02em}
+.top p{margin:6px 0 0;opacity:.85;font-size:.92rem}
+form{display:grid;gap:14px;padding:24px}
+label{display:grid;gap:5px;font-size:.85rem;font-weight:600;color:var(--ink-2)}
+input{font:inherit;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:11px 14px;width:100%}
+input:focus{outline:2px solid var(--leaf);outline-offset:1px;border-color:transparent}
+button{font:inherit;font-weight:700;color:#fff;background:var(--hero);border:0;border-radius:999px;padding:12px 18px;cursor:pointer;margin-top:4px}
+.msg{margin:0;font-size:.88rem;font-weight:600}
+.msg.err{color:var(--chili)}.msg.ok{color:var(--ok)}
+</style>
+</head>
+<body>
+<main class="card">
+  <div class="top"><h1>Vaaram</h1><p>Plan the family's week: protein and fiber for everyone, groceries ready.</p></div>
+  <form method="post" action="/api/login">
+    <p class="msg" id="msg" hidden></p>
+    <label>Username<input name="username" autocomplete="username" autocapitalize="none" required></label>
+    <label>Password<input name="password" type="password" autocomplete="current-password" required></label>
+    <button type="submit">Sign in</button>
+  </form>
+</main>
+<script>
+const q=new URLSearchParams(location.search),m=document.getElementById('msg');
+if(q.has('e')){m.textContent='That username or password is not right. Try again.';m.className='msg err';m.hidden=false}
+else if(q.has('out')){m.textContent='You are signed out.';m.className='msg ok';m.hidden=false}
+document.querySelector('input[name=username]').focus();
+</script>
+</body>
+</html>

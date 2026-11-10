@@ -1,21 +1,16 @@
-// Password gate for the whole site (HTTP Basic Auth).
-// Username and password come from the project's environment variables.
-export const config = { matcher: '/(.*)' };
+// Everything except the login page needs a valid session cookie.
+import { validSession } from './api/_auth.js';
 
-export default function middleware(request) {
-  const user = process.env.VAARAM_USER || 'family';
-  const pass = process.env.VAARAM_PASSWORD;
-  const auth = request.headers.get('authorization') || '';
-  if (pass && auth.startsWith('Basic ')) {
-    try {
-      const [u, ...rest] = atob(auth.slice(6)).split(':');
-      if (u === user && rest.join(':') === pass) {
-        return new Response(null, { headers: { 'x-middleware-next': '1' } });
-      }
-    } catch (e) {}
+export const config = { matcher: '/(.*)' };
+const OPEN = new Set(['/login.html', '/api/login', '/api/health', '/icon.svg', '/manifest.webmanifest']);
+
+export default async function middleware(request) {
+  const path = new URL(request.url).pathname;
+  if (OPEN.has(path) || await validSession(request)) {
+    return new Response(null, { headers: { 'x-middleware-next': '1' } });
   }
-  return new Response('Please sign in to open Vaaram.', {
-    status: 401,
-    headers: { 'WWW-Authenticate': 'Basic realm="Vaaram", charset="UTF-8"', 'Cache-Control': 'no-store' },
-  });
+  if (path.startsWith('/api/')) {
+    return Response.json({ error: 'signed_out' }, { status: 401, headers: { 'Cache-Control': 'no-store' } });
+  }
+  return new Response(null, { status: 302, headers: { Location: '/login.html', 'Cache-Control': 'no-store' } });
 }
