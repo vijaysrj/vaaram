@@ -1,0 +1,1252 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Vaaram Family Meals</title>
+<meta name="description" content="A weekly family meal planner with protein and fiber goals for everyone and a ready grocery list.">
+<meta name="theme-color" content="#4f46e5">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icon.svg">
+<link rel="manifest" href="manifest.webmanifest">
+<style>:root{color-scheme:light;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0;font:14px system-ui,sans-serif}img{max-width:100%}[hidden]{display:none!important}</style>
+</head>
+<body>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&display=swap">
+<style>
+/* Layout: gradient header band, tab bar, then one focused view (day / protein / groceries / family) */
+:root{
+  --bg:#f5f5fa;
+  --surface:#ffffff;
+  --surface-2:#eeeef7;
+  --ink:#16152b;
+  --ink-2:#5f5f7a;
+  --line:#e3e3ee;
+  --leaf:#4f46e5;        /* primary indigo */
+  --leaf-ink:#ffffff;
+  --brand-text:#3f37c9;
+  --hero:linear-gradient(120deg,#312e81 0%,#5b45e0 50%,#ec6a5c 100%);
+  --zari:#f59e0b;
+  --turmeric:#f59e0b;
+  --turmeric-soft:#fff3d6;
+  --chili:#e11d48;
+  --dusk:#6366f1;
+  --ok:#059669;
+  --warn:#d97706;
+  --b:#f59e0b; --l:#10b981; --s:#f43f5e; --d:#6366f1;
+  --shadow:0 1px 2px rgba(22,21,43,.05),0 12px 30px -16px rgba(49,46,129,.35);
+  --dotc:rgba(99,102,241,.10);
+  --font-display:"Plus Jakarta Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-body:"DM Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --r:16px;
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
+  --bg:#0e0e1a; --surface:#181829; --surface-2:#22223a; --ink:#ececf8; --ink-2:#a6a6c4; --line:#2e2e48;
+  --leaf:#6366f1; --leaf-ink:#ffffff; --brand-text:#a5b4fc; --hero:linear-gradient(120deg,#1e1b4b 0%,#3b2fa6 50%,#b4485c 100%);
+  --zari:#fbbf24; --turmeric:#fbbf24; --turmeric-soft:#3a2e10; --chili:#fb7185; --dusk:#a5b4fc;
+  --ok:#34d399; --warn:#fbbf24; --b:#fbbf24; --l:#34d399; --s:#fb7185; --d:#a5b4fc;
+  --shadow:0 1px 2px rgba(0,0,0,.3),0 12px 30px -14px rgba(0,0,0,.7); --dotc:rgba(165,180,252,.06); color-scheme:dark }}
+:root[data-theme="dark"]{
+  --bg:#0e0e1a; --surface:#181829; --surface-2:#22223a; --ink:#ececf8; --ink-2:#a6a6c4; --line:#2e2e48;
+  --leaf:#6366f1; --leaf-ink:#ffffff; --brand-text:#a5b4fc; --hero:linear-gradient(120deg,#1e1b4b 0%,#3b2fa6 50%,#b4485c 100%);
+  --zari:#fbbf24; --turmeric:#fbbf24; --turmeric-soft:#3a2e10; --chili:#fb7185; --dusk:#a5b4fc;
+  --ok:#34d399; --warn:#fbbf24; --b:#fbbf24; --l:#34d399; --s:#fb7185; --d:#a5b4fc;
+  --shadow:0 1px 2px rgba(0,0,0,.3),0 12px 30px -14px rgba(0,0,0,.7); --dotc:rgba(165,180,252,.06); color-scheme:dark }
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--font-body);font-size:15px;line-height:1.5;font-variant-numeric:tabular-nums}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--leaf)}
+.wrap{max-width:1080px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+h1,h2,h3{font-family:var(--font-display);text-wrap:balance;margin:0;line-height:1.15}
+button{font:inherit;color:inherit;cursor:pointer}
+:focus-visible{outline:2px solid var(--turmeric);outline-offset:2px;border-radius:6px}
+a{color:inherit}
+
+/* Header */
+.hero{background:var(--leaf);color:var(--leaf-ink);position:relative;overflow:hidden}
+.hero .wrap{padding-block:22px 18px;display:flex;gap:16px;align-items:center;justify-content:space-between;flex-wrap:wrap;position:relative;z-index:1}
+.brand{display:flex;gap:14px;align-items:center}
+.brand h1{font-size:2.1rem;font-weight:800;letter-spacing:.01em}
+.brand .ta{font-family:var(--font-display);opacity:.75;font-size:1rem;font-weight:600}
+.brand p{margin:0;opacity:.82;font-size:.92rem}
+.weeknav{display:flex;align-items:center;gap:6px;background:var(--leaf);border:1px solid rgba(255,255,255,.22);border-radius:999px;padding:4px}
+.weeknav button{background:none;border:0;width:34px;height:34px;border-radius:50%;font-size:1.1rem;color:var(--leaf-ink)}
+.weeknav button:hover{background:rgba(255,255,255,.14)}
+.weeknav span{font-weight:600;min-width:150px;text-align:center;font-size:.95rem}
+
+/* Tabs */
+.tabs{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--bg);border-bottom:1px solid var(--line)}
+.tabs .wrap{display:flex;gap:4px;overflow-x:auto;scrollbar-width:none}
+.tab{background:none;border:0;padding:12px 14px;font-weight:600;color:var(--ink-2);border-bottom:3px solid transparent;white-space:nowrap}
+.tab[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--turmeric)}
+.tab .count{display:inline-block;margin-left:6px;background:var(--surface-2);border-radius:999px;padding:0 7px;font-size:.78rem}
+main{padding-block:20px 60px}
+.view{display:grid;gap:20px}
+.view>*{min-width:0}
+
+/* Day strip */
+.days{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:6px}
+.day{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:8px 4px 7px;text-align:center;display:grid;gap:2px}
+.day b{font-family:var(--font-display);font-size:1.05rem;font-weight:700}
+.day small{color:var(--ink-2);font-size:.72rem;text-transform:uppercase;letter-spacing:.06em}
+.day .dots{display:flex;justify-content:center;gap:3px;margin-top:2px}
+.day .dots i{width:6px;height:6px;border-radius:50%;background:var(--ok)}
+.day .dots i.low{background:var(--warn)}
+.day[aria-pressed="true"]{background:var(--leaf);color:var(--leaf-ink);border-color:var(--leaf)}
+.day[aria-pressed="true"] small{color:var(--leaf-ink);opacity:.8}
+
+.dayhead{display:flex;justify-content:space-between;align-items:end;gap:12px;flex-wrap:wrap}
+.dayhead h2{font-size:1.7rem}
+.dayhead p{margin:0;color:var(--ink-2)}
+.btn{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:8px 14px;font-weight:600;font-size:.88rem;display:inline-flex;gap:6px;align-items:center;text-decoration:none}
+.btn:hover{border-color:var(--ink-2)}
+.btn.primary{background:var(--leaf);color:var(--leaf-ink);border-color:var(--leaf)}
+.btn.gold{background:var(--turmeric);color:#231a04;border-color:var(--turmeric)}
+
+/* Meals: the leaf */
+.meals{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:12px}
+.meal{background:var(--surface);border:1px solid var(--line);border-radius:20px;padding:16px 16px 14px;display:grid;gap:8px;align-content:start;position:relative;min-width:0}
+.meal .slot{display:flex;justify-content:space-between;align-items:center;font-size:.75rem;text-transform:uppercase;letter-spacing:.08em;font-weight:700;color:var(--ink-2)}
+.meal .slot i{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:6px;vertical-align:1px}
+.meal h3{font-size:1.22rem;font-weight:700}
+.meal .note{margin:0;color:var(--ink-2);font-size:.86rem}
+.meal .foot{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-top:2px;flex-wrap:wrap}
+.pchip{background:var(--turmeric-soft);border-radius:999px;padding:2px 10px;font-weight:700;font-size:.82rem}
+.tag{font-size:.72rem;border:1px solid var(--line);border-radius:999px;padding:1px 8px;color:var(--ink-2)}
+.tag.nv{border-color:var(--chili);color:var(--chili)}
+.swap{background:none;border:1px dashed var(--line);border-radius:999px;padding:4px 10px;font-size:.8rem;font-weight:600;color:var(--ink-2)}
+.swap:hover{border-style:solid;color:var(--ink)}
+
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:16px}
+.panel h3{font-size:1.15rem;margin-bottom:10px}
+.split{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(0,1fr);gap:16px}
+@media (max-width:760px){.split{grid-template-columns:1fr}}
+
+.who{display:grid;grid-template-columns:repeat(auto-fill,minmax(84px,1fr));gap:8px}
+@media (max-width:460px){.who{grid-template-columns:repeat(3,minmax(0,1fr))}}
+.person{display:grid;justify-items:center;gap:2px;text-align:center}
+.person b{font-size:.86rem}
+.person small{color:var(--ink-2);font-size:.75rem}
+.ring{width:64px;height:64px}
+.ring text{font-family:var(--font-body);font-weight:700;fill:var(--ink)}
+.list{list-style:none;margin:0;padding:0;display:grid;gap:8px}
+.list li{display:flex;gap:10px;align-items:baseline}
+.list li .k{font-weight:700;min-width:62px}
+.list li .v{color:var(--ink-2);flex:1}
+.prep li::before{content:"";flex:none;width:7px;height:7px;border-radius:50%;background:var(--turmeric);align-self:center}
+
+/* Week table */
+.tablewrap{overflow-x:auto;border:1px solid var(--line);border-radius:var(--r);background:var(--surface)}
+table{border-collapse:collapse;width:100%;min-width:760px;font-size:.85rem}
+th,td{padding:9px 10px;text-align:left;vertical-align:top;border-bottom:1px solid var(--line)}
+th{font-weight:700;color:var(--ink-2);font-size:.75rem;text-transform:uppercase;letter-spacing:.06em}
+td.cell{cursor:pointer}
+td.cell:hover{background:var(--surface-2)}
+tr:last-child td{border-bottom:0}
+.today-col{background:var(--surface-2)}
+
+/* Protein */
+.pgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:12px}
+.pcard{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:16px;display:grid;gap:10px}
+.pcard header{display:flex;justify-content:space-between;gap:10px;align-items:start}
+.pcard h3{font-size:1.25rem}
+.pcard .meta{color:var(--ink-2);font-size:.82rem}
+.big{font-family:var(--font-display);font-size:1.9rem;font-weight:800;line-height:1}
+.big small{font-size:.9rem;color:var(--ink-2);font-weight:600}
+.bars{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;align-items:end;height:90px;position:relative;padding-top:6px}
+.bars .bar{background:var(--l);border-radius:5px 5px 2px 2px;position:relative;min-height:3px}
+.bars .bar.low{background:var(--warn)}
+.bars .tl{position:absolute;left:0;right:0;border-top:2px dashed var(--ink-2);opacity:.6}
+.blabels{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;font-size:.7rem;color:var(--ink-2);text-align:center}
+.basis{font-size:.82rem;color:var(--ink-2);margin:0}
+
+/* Groceries */
+.cats{columns:2 340px;column-gap:16px}
+.cat{break-inside:avoid;margin-bottom:16px;background:var(--surface);border:1px solid var(--line);border-radius:var(--r);overflow:hidden}
+.cat h3{font-size:1.05rem;padding:12px 14px 8px;display:flex;justify-content:space-between}
+.cat h3 small{font-family:var(--font-body);color:var(--ink-2);font-weight:500;font-size:.8rem}
+.item{display:grid;grid-template-columns:auto minmax(0,1fr);gap:10px;align-items:center;padding:9px 14px;border-top:1px solid var(--line)}
+.item input{width:20px;height:20px;accent-color:var(--leaf)}
+.item .nm{font-weight:600}
+.item .q{font-size:.8rem;color:var(--ink-2)}
+.item.done .nm{text-decoration:line-through;opacity:.55}
+.item.done .q{opacity:.55}
+/* Dish builder */
+.builder{display:grid;gap:14px}
+.ingrows{display:grid;gap:8px}
+.ingrow{display:grid;grid-template-columns:minmax(0,1fr) 110px auto;gap:8px;align-items:end}
+.ingrow .other{grid-column:1/-1;display:grid;grid-template-columns:minmax(0,1fr) 130px 130px;gap:8px}
+@media (max-width:560px){.ingrow .other{grid-template-columns:1fr 1fr}.ingrow .other .field:first-child{grid-column:1/-1}}
+.ingrow .pv{font-size:.78rem;color:var(--ink-2);grid-column:1/-1;margin-top:-4px}
+.x{border:1px solid var(--line);background:var(--surface);border-radius:8px;width:38px;height:38px;font-size:1.1rem;color:var(--ink-2)}
+.x:hover{color:var(--chili);border-color:var(--chili)}
+.unitwrap{position:relative}
+.unitwrap span{position:absolute;right:10px;top:50%;transform:translateY(-50%);font-size:.8rem;color:var(--ink-2);pointer-events:none}
+.unitwrap input{padding-right:38px;-moz-appearance:textfield;appearance:textfield}
+.unitwrap input::-webkit-inner-spin-button,.unitwrap input::-webkit-outer-spin-button{-webkit-appearance:none;margin:0}
+.tally{display:flex;gap:16px;align-items:center;flex-wrap:wrap;background:var(--turmeric-soft);border-radius:12px;padding:12px 14px}
+.tally .big{font-size:2.2rem}
+.tally .who2{display:flex;gap:12px;flex-wrap:wrap;font-size:.84rem}
+.mine{display:grid;gap:10px}
+.mydish{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px;align-items:center;background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:12px 14px}
+.mydish h3{font-size:1.1rem}
+.mydish .acts{display:flex;gap:6px;flex-wrap:wrap;justify-content:end;align-items:center}
+.mydish select{font:inherit;font-size:.84rem;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:999px;padding:6px 10px}
+@media (max-width:560px){.mydish{grid-template-columns:1fr}.mydish .acts{justify-content:start}.ingrow{grid-template-columns:minmax(0,1fr) 96px auto}}
+.tops{display:grid;gap:12px}
+.top{display:grid;gap:6px;padding-bottom:10px;border-bottom:1px solid var(--line)}
+.top:last-child{border-bottom:0;padding-bottom:0}
+.tophead{display:flex;gap:10px;align-items:baseline;flex-wrap:wrap}
+.tophead .ok{color:var(--ok);font-weight:700}.tophead .low{color:var(--warn);font-weight:700}
+.toprow{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;align-items:center}
+.toprow.fixed{font-size:.88rem;color:var(--ink-2)}
+.toprow select{font:inherit;font-size:.88rem;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:7px 8px;width:100%;min-width:0}
+.toprow .x{width:34px;height:34px}
+.top .linkbtn{justify-self:start;padding-left:0}
+.linkbtn{background:none;border:0;padding:4px 6px;font:inherit;font-size:.85rem;font-weight:600;color:var(--ink-2);text-decoration:underline;text-underline-offset:3px}
+#printView{display:none}
+@media print{
+  @page{size:A4 landscape;margin:10mm}
+  :root{padding:0!important}
+  body{background:#fff!important;color:#111!important;font-size:9.5pt}
+  body::before,.hero,.tabs,main,.toast{display:none!important}
+  #printView{display:block}
+  .pp header{display:flex;justify-content:space-between;align-items:baseline;border-bottom:2pt solid #4f46e5;margin-bottom:6pt;padding-bottom:3pt}
+  .pp h1{font-family:var(--font-display);font-size:18pt;color:#4f46e5;margin:0}.pp h1 span{font-size:11pt;color:#555}
+  .pp header p{margin:0;color:#444}
+  .pt{width:100%;min-width:0;border-collapse:collapse;font-size:8.5pt;table-layout:fixed}
+  .pt th,.pt td{border:.5pt solid #bbb;padding:2.5pt 4pt;vertical-align:top;color:#111}
+  .pt thead th{background:#eef3ea;font-size:8pt;text-transform:uppercase;letter-spacing:.04em}
+  .pt th small,.pt td small{display:block;color:#777;font-size:7pt;font-weight:400;text-transform:none;letter-spacing:0}
+  .pt tbody th{width:7%;font-family:var(--font-display);font-size:11pt;background:#f6f8f3}
+  .pt td.tu{font-size:7.5pt;width:17%}.pt td.pr{font-size:7pt;width:16%}
+  .pt td.pr div{display:flex;justify-content:space-between;gap:4pt}
+  .pt tr{break-inside:avoid}
+  .pfoot{font-size:7pt;color:#666;margin:4pt 0 0}
+  .pb{break-before:page}
+  .pcols{columns:4;column-gap:12pt}
+  .pcat{break-inside:avoid;margin-bottom:8pt}
+  .pcat h2{font-family:var(--font-display);font-size:11pt;color:#4f46e5;margin:0 0 3pt;border-bottom:.5pt solid #bbb}
+  .pi{display:grid;grid-template-columns:9pt 1fr auto;gap:4pt;align-items:center;padding:1.5pt 0;font-size:8.5pt}
+  .pi .bx{width:8pt;height:8pt;border:.8pt solid #333;border-radius:1.5pt}
+  .pi em{font-style:normal;color:#555;font-size:7.5pt}
+}
+.measure{margin:0;font-size:.84rem;font-weight:600;color:var(--brand-text);display:flex;gap:6px;align-items:baseline}
+.measure::before{content:"";flex:none;width:12px;height:7px;border:1.6px solid currentColor;border-top:0;border-radius:0 0 8px 8px;transform:translateY(-1px)}
+.measure:empty{display:none}
+.libtools{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.libtools input{font:inherit;color:var(--ink);background:var(--surface);border:1px solid var(--line);border-radius:999px;padding:8px 14px;flex:1;min-width:200px}
+.lib{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:10px}
+.libd{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px 14px;display:grid;gap:6px;align-content:start;min-width:0}
+.libd.off{opacity:.55}
+.libd h4{margin:0;font-family:var(--font-display);font-size:1.05rem;line-height:1.2}
+.libd .meta{display:flex;gap:6px;flex-wrap:wrap;align-items:center;font-size:.78rem;color:var(--ink-2)}
+.libd .ings{font-size:.8rem;color:var(--ink-2)}
+.libd .acts{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.libd .acts select{font:inherit;font-size:.8rem;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:999px;padding:4px 8px}
+.libd .acts .btn{padding:4px 10px;font-size:.8rem}
+.mytag{font-size:.72rem;border:1px solid var(--turmeric);color:var(--ink);border-radius:999px;padding:1px 8px}
+.pantry{display:flex;flex-wrap:wrap;gap:6px}
+.pantry button{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:5px 12px;font-size:.84rem}
+.pantry button[aria-pressed="true"]{background:var(--turmeric-soft);border-color:var(--turmeric);font-weight:700}
+.callout{background:var(--turmeric-soft);border-radius:var(--r);padding:16px;display:grid;gap:8px}
+.callout p{margin:0}
+.im-steps{display:flex;gap:6px;flex-wrap:wrap;font-size:.78rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em}
+.im-steps span{padding:3px 10px;border-radius:999px;background:var(--surface);color:var(--ink-2)}
+.im-steps span.on{background:var(--leaf);color:var(--leaf-ink)}
+.im-step{border:1px solid var(--leaf);background:var(--surface);color:var(--leaf);border-radius:999px;padding:3px 10px;font:inherit;font-weight:700;text-transform:uppercase;letter-spacing:.06em}
+.im-step:hover{background:var(--leaf);color:var(--leaf-ink)}
+.linkbtn{background:none;border:0;padding:4px 6px;font:inherit;font-size:.85rem;font-weight:600;color:var(--ink-2);text-decoration:underline;text-underline-offset:3px}
+.bar2{height:8px;border-radius:999px;background:var(--surface);overflow:hidden}.bar2 i{display:block;height:100%;background:var(--leaf);transition:width .2s}
+.item.sel{background:var(--turmeric-soft)}
+.pick .x{width:32px;height:32px}
+.btn[disabled]{opacity:.5;cursor:not-allowed}
+.picks{display:grid;gap:6px;max-height:520px;overflow:auto;background:var(--surface);border-radius:10px;padding:8px}
+.pick{display:grid;grid-template-columns:auto minmax(0,1fr) minmax(0,1.6fr) 64px;gap:8px;align-items:center;padding:6px 4px;border-bottom:1px solid var(--line)}
+.pick:last-child{border-bottom:0}
+.pick select,.pick input[type=number],.im-sel{font:inherit;font-size:.84rem;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:6px 8px;width:100%;min-width:0}
+.pick .nm{font-weight:600;font-size:.88rem}
+.pick .miss{font-size:.82rem;color:var(--chili)}
+@media (max-width:620px){.pick{grid-template-columns:auto minmax(0,1fr) 64px}.pick .opt{grid-column:2/-1}}
+.bill{background:var(--surface);border-radius:10px;padding:10px 12px;display:grid;gap:4px;font-size:.88rem}
+.bill div{display:flex;justify-content:space-between;gap:10px}
+.bill .tot{font-weight:800;font-size:1rem;border-top:1px solid var(--line);padding-top:6px}
+.err{color:var(--chili);font-weight:600}
+code{background:var(--surface);padding:1px 6px;border-radius:6px;font-size:.85em;user-select:all}
+.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 18px;border-radius:999px;font-weight:600;font-size:.9rem;z-index:20}
+textarea.copy{width:100%;min-height:120px;font:inherit;font-size:.8rem;background:var(--surface);color:var(--ink);border:1px solid var(--line);border-radius:10px;padding:8px}
+
+/* Family */
+.fam{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:12px}
+.field{display:grid;gap:4px;font-size:.84rem;color:var(--ink-2)}
+.field input,.field select{font:inherit;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:7px 10px;width:100%}
+.row{display:flex;gap:10px;flex-wrap:wrap}
+.row .field{flex:1;min-width:110px}
+.toggle{display:flex;gap:10px;align-items:center;font-size:.92rem}
+.toggle input{width:18px;height:18px;accent-color:var(--leaf)}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:999px;overflow:hidden}
+.seg button{border:0;background:var(--surface);padding:6px 13px;font-weight:600;font-size:.88rem}
+.seg button[aria-pressed="true"]{background:var(--leaf);color:var(--leaf-ink)}
+.muted{color:var(--ink-2)}
+.small{font-size:.84rem}
+@media (prefers-reduced-motion:no-preference){ .meal{transition:transform .15s ease} .meal.flip{animation:flip .35s ease} @keyframes flip{from{transform:rotateX(70deg);opacity:.3}to{transform:none;opacity:1}} }
+
+/* ===== Theme: modern. Indigo-to-coral header with soft light blobs, airy cards, slot-coloured meal cards ===== */
+body{background:radial-gradient(1200px 500px at 85% -10%,color-mix(in srgb,var(--leaf) 10%,transparent),transparent 70%),var(--bg);background-attachment:fixed}
+body::before{background:#312e81}
+.hero{background:var(--hero)}
+.hero::before{content:"";position:absolute;right:-80px;top:-120px;width:360px;height:360px;border-radius:50%;background:radial-gradient(circle,rgba(255,255,255,.28),transparent 65%);pointer-events:none}
+.hero::after{content:"";position:absolute;left:30%;bottom:-140px;width:420px;height:260px;border-radius:50%;background:radial-gradient(circle,rgba(255,200,170,.25),transparent 65%);pointer-events:none}
+.hero .wrap{padding-block:26px 22px}
+.brand h1{font-size:2.4rem;color:#fff;letter-spacing:-.02em}
+.brand .ta{color:var(--leaf-ink);opacity:.8}
+.brand p{max-width:42ch}
+.weeknav{background:rgba(255,255,255,.14);border-color:rgba(255,255,255,.3);backdrop-filter:blur(6px)}
+.weeknav button:hover{background:rgba(255,255,255,.2)}
+.tabs{background:color-mix(in srgb,var(--bg) 82%,transparent);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+.tabs .wrap{padding-block:8px;gap:6px}
+.tab{border:0;border-radius:999px;padding:8px 16px;transition:background .15s,color .15s}
+.tab:hover{background:var(--surface-2);color:var(--ink)}
+.tab[aria-selected="true"]{background:var(--leaf);color:var(--leaf-ink);box-shadow:0 6px 16px -8px var(--leaf)}
+.tab[aria-selected="true"] .count{background:var(--turmeric);color:#2a1a02}
+.day{border-color:transparent;box-shadow:var(--shadow);transition:transform .15s}
+.day:hover{transform:translateY(-2px)}
+.day[aria-pressed="true"]{background:var(--hero);border-color:transparent;box-shadow:0 10px 22px -10px #4f46e5}
+.day[aria-pressed="true"] b{color:#fff}
+.dayhead h2{font-size:2rem;letter-spacing:-.02em}
+.btn{background:var(--surface);box-shadow:var(--shadow);border-color:var(--line);transition:transform .12s,border-color .12s}
+.btn:hover{transform:translateY(-1px);border-color:var(--turmeric)}
+.btn.primary{background:var(--hero);border-color:transparent}
+.meal{--c:var(--leaf);border:1px solid color-mix(in srgb,var(--c) 22%,var(--line));background:linear-gradient(170deg,color-mix(in srgb,var(--c) 13%,var(--surface)) 0%,var(--surface) 55%);box-shadow:var(--shadow);overflow:hidden;padding-top:20px}
+.meal::before{content:"";position:absolute;left:0;right:0;top:0;height:6px;background:linear-gradient(90deg,var(--c),color-mix(in srgb,var(--c) 40%,var(--turmeric)))}
+.meal .slot{color:var(--c)}
+.meal h3{font-size:1.3rem}
+@media (prefers-reduced-motion:no-preference){.meal:hover{transform:translateY(-3px)}}
+.pchip{background:var(--turmeric-soft);border:1px solid color-mix(in srgb,var(--turmeric) 55%,transparent)}
+.swap{background:var(--surface)}
+.panel,.pcard,.cat,.libd,.mydish,.day{box-shadow:var(--shadow)}
+.panel,.pcard,.cat,.libd{border-color:color-mix(in srgb,var(--line) 70%,transparent)}
+.pcard{position:relative;overflow:hidden}
+.pcard::before{content:"";position:absolute;left:0;top:0;bottom:0;width:5px;background:linear-gradient(var(--turmeric),var(--leaf))}
+.cat h3{background:linear-gradient(90deg,var(--turmeric-soft),transparent)}
+.libd{border-radius:16px}
+.callout,.tally{background:linear-gradient(120deg,var(--turmeric-soft),color-mix(in srgb,var(--leaf) 10%,var(--turmeric-soft)));border:1px solid color-mix(in srgb,var(--turmeric) 40%,transparent)}
+.seg button[aria-pressed="true"],.im-steps span.on{background:var(--hero)}
+@media (max-width:460px){.day .dots{gap:2px}.day .dots i{width:4px;height:4px}}
+.chips{display:flex;gap:6px;flex-wrap:wrap}
+.fchip{background:color-mix(in srgb,var(--l) 13%,transparent);border:1px solid color-mix(in srgb,var(--l) 45%,transparent);border-radius:999px;padding:2px 10px;font-weight:700;font-size:.82rem}
+.fbar{display:block;width:60px;height:5px;border-radius:9px;background:var(--surface-2);overflow:hidden;margin:4px 0 0}.fbar i{display:block;height:100%;background:var(--ok);border-radius:9px}.fbar.low i{background:var(--warn)}
+.tophead{row-gap:2px}
+.fhead{display:flex;justify-content:space-between;gap:10px;align-items:end;border-top:1px solid var(--line);padding-top:10px}
+.fhead .big{font-size:1.5rem}
+.bars.fiber .bar{background:var(--d)}.bars.fiber .bar.low{background:var(--warn)}
+.bars{height:104px;padding-top:20px}
+.bars .bar span{position:absolute;left:0;right:0;top:-17px;text-align:center;font-size:.7rem;font-weight:700;color:var(--ink-2)}
+.bars .bar:not(.sel){opacity:.55}
+.bars .bar.sel span{color:var(--ink);font-size:.78rem}
+.blabels span.sel{color:var(--ink);font-weight:800}
+.pcard .big small{display:block;font-size:.72rem;margin-top:2px;text-align:right;white-space:nowrap}
+.toast{background:var(--hero);color:#fff;box-shadow:var(--shadow)}
+</style>
+
+<header class="hero">
+  <div class="wrap">
+    <div class="brand">
+      <div>
+        <h1>Vaaram</h1>
+        <p>Plan the family's week: protein and fiber for everyone, groceries ready.</p>
+      </div>
+    </div>
+    <div class="weeknav" role="group" aria-label="Choose week">
+      <button id="prevWeek" aria-label="Previous week">‹</button>
+      <span id="weekLabel">Week</span>
+      <button id="nextWeek" aria-label="Next week">›</button>
+    </div>
+  </div>
+</header>
+<nav class="tabs" aria-label="Sections">
+  <div class="wrap" role="tablist">
+    <button class="tab" role="tab" data-tab="plan">Week plan</button>
+    <button class="tab" role="tab" data-tab="protein">Protein &amp; fiber</button>
+    <button class="tab" role="tab" data-tab="groceries">Groceries <span class="count" id="gcount"></span></button>
+    <button class="tab" role="tab" data-tab="dishes">My dishes</button>
+    <button class="tab" role="tab" data-tab="family">Family &amp; diet</button>
+  </div>
+</nav>
+<main class="wrap" id="app"></main>
+<div class="toast" id="toast" hidden></div>
+<div id="printView" aria-hidden="true"></div>
+
+<script>
+/* ---------- Data ---------- */
+// key: [name, category, unit, protein per 100 g/ml (or per piece), pack size, search term]
+const ING = {
+ idli_rice:['Idli rice','Grains & flours','g',7,1000,'idli rice'],
+ rice:['Sona masoori rice','Grains & flours','g',7,1000,'sona masoori rice'],
+ rice_flour:['Rice flour','Grains & flours','g',6,500,'rice flour'],
+ atta:['Whole wheat atta','Grains & flours','g',12,1000,'whole wheat atta'],
+ rava:['Bombay rava (sooji)','Grains & flours','g',11,500,'sooji rava'],
+ ragi:['Ragi flour','Grains & flours','g',7,500,'ragi flour'],
+ poha:['Thick poha (aval)','Grains & flours','g',7,500,'thick poha'],
+ vermicelli:['Semiya (vermicelli)','Grains & flours','g',11,400,'roasted vermicelli'],
+ urad:['Urad dal','Dals & legumes','g',24,500,'urad dal'],
+ toor:['Toor dal','Dals & legumes','g',22,1000,'toor dal'],
+ moong:['Moong dal','Dals & legumes','g',24,500,'moong dal'],
+ chana_dal:['Chana dal','Dals & legumes','g',20,500,'chana dal'],
+ kabuli:['Kabuli chana','Dals & legumes','g',19,500,'kabuli chana'],
+ black_chana:['Kala chana','Dals & legumes','g',19,500,'kala chana'],
+ green_gram:['Whole green gram','Dals & legumes','g',24,500,'green moong whole'],
+ horsegram:['Horse gram (kollu)','Dals & legumes','g',22,500,'horse gram'],
+ soya:['Soya chunks','Dals & legumes','g',52,200,'soya chunks'],
+ roasted_chana:['Roasted chana (pottukadalai)','Dals & legumes','g',20,500,'roasted chana dal'],
+ paneer:['Paneer','Dairy & eggs','g',18,200,'paneer'],
+ curd:['Curd','Dairy & eggs','g',3.5,1000,'curd'],
+ milk:['Toned milk','Dairy & eggs','ml',3.2,1000,'toned milk'],
+ egg:['Eggs','Dairy & eggs','pc',6.3,6,'eggs'],
+ chicken:['Chicken (boneless)','Meat & fish','g',22,500,'chicken boneless'],
+ fish:['Fish (seer / vanjaram)','Meat & fish','g',20,500,'seer fish'],
+ onion:['Onion','Vegetables','g',1.1,1000,'onion'],
+ tomato:['Tomato','Vegetables','g',0.9,1000,'tomato'],
+ potato:['Potato','Vegetables','g',2,1000,'potato'],
+ carrot:['Carrot','Vegetables','g',0.9,500,'carrot'],
+ beans:['French beans','Vegetables','g',1.8,250,'beans'],
+ cabbage:['Cabbage','Vegetables','g',1.3,500,'cabbage'],
+ brinjal:['Brinjal','Vegetables','g',1,500,'brinjal'],
+ okra:["Lady's finger",'Vegetables','g',2,250,'ladies finger'],
+ spinach:['Spinach / keerai','Vegetables','g',2.9,250,'spinach'],
+ drumstick:['Drumstick','Vegetables','pc',0.5,3,'drumstick'],
+ capsicum:['Capsicum','Vegetables','g',1,250,'capsicum'],
+ cucumber:['Cucumber','Vegetables','g',0.7,500,'cucumber'],
+ mushroom:['Mushroom','Vegetables','g',3.1,200,'button mushroom'],
+ peas:['Green peas (frozen)','Vegetables','g',5,500,'frozen green peas'],
+ coconut:['Coconut','Vegetables','pc',13,1,'coconut'],
+ lemon:['Lemon','Vegetables','pc',0.3,4,'lemon'],
+ banana:['Banana (robusta)','Fruits','pc',1.3,6,'banana robusta'],
+ peanut:['Peanuts','Nuts & seeds','g',25,500,'raw peanuts'],
+ almond:['Almonds','Nuts & seeds','g',21,200,'almonds'],
+ makhana:['Makhana','Nuts & seeds','g',9.7,100,'makhana'],
+ cashew:['Cashews','Nuts & seeds','g',18,200,'cashew'],
+ sesame:['Sesame seeds','Nuts & seeds','g',18,100,'white sesame'],
+ peanut_butter:['Peanut butter','Nuts & seeds','g',25,340,'peanut butter unsweetened'],
+ besan:['Besan (gram flour)','Grains & flours','g',22,500,'besan'],
+ oats:['Rolled oats','Grains & flours','g',13,500,'rolled oats'],
+ brown_rice:['Brown rice','Grains & flours','g',7.5,1000,'brown rice'],
+ millet:['Millet (foxtail / little)','Grains & flours','g',11,500,'foxtail millet'],
+ wheat_rava:['Broken wheat (godhumai rava)','Grains & flours','g',12,500,'broken wheat'],
+ bread:['Whole wheat bread','Grains & flours','pc',3,20,'whole wheat bread'],
+ masoor:['Masoor dal','Dals & legumes','g',24,500,'masoor dal'],
+ rajma:['Rajma','Dals & legumes','g',22,500,'rajma'],
+ cowpea:['Lobia / karamani','Dals & legumes','g',23,500,'lobia'],
+ tofu:['Tofu','Dairy & eggs','g',12,200,'tofu'],
+ cheese:['Cheese slice','Dairy & eggs','pc',4,10,'cheese slices'],
+ whey:['Whey protein','Dairy & eggs','g',78,1000,'whey protein'],
+ mutton:['Mutton','Meat & fish','g',20,500,'mutton curry cut'],
+ prawns:['Prawns','Meat & fish','g',20,250,'prawns'],
+ chicken_bone:['Chicken (curry cut)','Meat & fish','g',18,500,'chicken curry cut'],
+ cauliflower:['Cauliflower','Vegetables','g',1.9,500,'cauliflower'],
+ beetroot:['Beetroot','Vegetables','g',1.6,500,'beetroot'],
+ bottle_gourd:['Bottle gourd (sorakkai)','Vegetables','g',.6,500,'bottle gourd'],
+ pumpkin:['Pumpkin','Vegetables','g',1,500,'yellow pumpkin'],
+ raw_banana:['Raw banana','Vegetables','pc',1.5,2,'raw banana'],
+ sweet_potato:['Sweet potato','Vegetables','g',1.6,500,'sweet potato'],
+ corn:['Sweet corn','Vegetables','g',3.3,250,'sweet corn'],
+ shallots:['Small onion (sambar onion)','Vegetables','g',2.5,250,'sambar onion'],
+ apple:['Apple','Fruits','pc',.5,4,'apple'],
+ guava:['Guava','Fruits','pc',2.5,4,'guava'],
+ papaya:['Papaya','Fruits','g',.5,1000,'papaya'],
+ pomegranate:['Pomegranate','Fruits','pc',4,2,'pomegranate'],
+ dates:['Dates','Fruits','g',2.5,250,'seedless dates'],
+ flax:['Flax seeds','Nuts & seeds','g',18,100,'flax seeds'],
+ pumpkin_seeds:['Pumpkin seeds','Nuts & seeds','g',30,100,'pumpkin seeds'],
+ chia:['Chia seeds','Nuts & seeds','g',17,100,'chia seeds'],
+ walnut:['Walnuts','Nuts & seeds','g',15,100,'walnuts'],
+ greek_yogurt:['Greek yogurt','Dairy & eggs','g',9,400,'greek yogurt plain'],
+ hung_curd:['Hung curd','Dairy & eggs','g',8,400,'hung curd'],
+ buttermilk:['Buttermilk','Dairy & eggs','ml',1.5,1000,'buttermilk'],
+ soy_milk:['Soy milk','Dairy & eggs','ml',3.3,1000,'soy milk unsweetened'],
+ sprouts_pack:['Mixed sprouts','Dals & legumes','g',8,200,'mixed sprouts'],
+ chickpea_flour_snack:['Roasted chana dal (dalia)','Dals & legumes','g',20,250,'dalia'],
+ ash_gourd:['Ash gourd','Vegetables','g',.4,500,'ash gourd'],
+ snake_gourd:['Snake gourd','Vegetables','g',.5,500,'snake gourd'],
+ chow_chow:['Chow chow (chayote)','Vegetables','g',.8,500,'chow chow'],
+ broad_beans:['Broad beans (avarai)','Vegetables','g',3,250,'broad beans avarai'],
+ colocasia:['Seppankizhangu (arbi)','Vegetables','g',1.5,500,'arbi colocasia'],
+ mint:['Mint & coriander','Vegetables','g',3,100,'mint leaves'],
+ kerala_rice:['Matta rice','Grains & flours','g',7.5,1000,'kerala matta rice'],
+ quinoa:['Quinoa','Grains & flours','g',14,500,'quinoa'],
+ jowar:['Jowar flour','Grains & flours','g',10,500,'jowar flour'],
+ kambu:['Kambu (pearl millet)','Grains & flours','g',11,500,'bajra pearl millet'],
+ crab:['Crab','Meat & fish','g',18,500,'crab'],
+ sardine:['Sardine (mathi)','Meat & fish','g',21,500,'sardine fish'],
+};
+// Dietary fiber, g per 100 g raw (or per piece), rounded from IFCT 2017 / USDA values
+const FIB={idli_rice:2.8,rice:2.8,rice_flour:2.4,atta:11.4,rava:3.9,ragi:11.2,poha:3.5,vermicelli:3,urad:11.9,toor:9.1,moong:9.4,chana_dal:15,kabuli:17,black_chana:22,green_gram:17,horsegram:12,soya:13,roasted_chana:15,
+ onion:2.5,tomato:1.7,potato:1.7,carrot:4.4,beans:4.2,cabbage:2.5,brinjal:4,okra:4,spinach:2.5,drumstick:1.5,capsicum:2.2,cucumber:.7,mushroom:2,peas:5.5,coconut:27,lemon:.3,banana:2.6,
+ peanut:8.5,almond:12.5,makhana:7,cashew:3.3,sesame:11.8,peanut_butter:6,besan:10.8,oats:10,brown_rice:3.5,millet:8,wheat_rava:12.5,bread:2,masoor:10.8,rajma:17,cowpea:11,tofu:1,
+ cauliflower:3.7,beetroot:2.8,bottle_gourd:.5,pumpkin:1.5,raw_banana:4,sweet_potato:3,corn:2.7,shallots:1.8,apple:4.4,guava:5.4,papaya:1.7,pomegranate:6,dates:8,flax:27,pumpkin_seeds:6,chia:34,walnut:6.7,
+ soy_milk:.5,sprouts_pack:4,chickpea_flour_snack:15,ash_gourd:.8,snake_gourd:.8,chow_chow:1.7,broad_beans:3.5,colocasia:4,mint:4,kerala_rice:3,quinoa:7,jowar:9.7,kambu:11.3};
+const fibOf=k=>{const i=ING[k];return i&&i[6]!=null?+i[6]:(FIB[k]||0)};
+const fib=ing=>Object.entries(ing).reduce((a,[k,q])=>{const i=ING[k];if(!i)return a;return a+(i[2]==='pc'?q*fibOf(k):q*fibOf(k)/100)},0);
+const BASE_ING=Object.keys(ING);
+const CAT_ORDER=['Vegetables','Fruits','Dairy & eggs','Meat & fish','Dals & legumes','Grains & flours','Nuts & seeds','Pantry top-ups'];
+const SOAK={green_gram:'whole green gram',kabuli:'kabuli chana',black_chana:'kala chana',horsegram:'horse gram'};
+
+// Dishes: amounts are per adult portion. Protein is computed from the ingredients.
+const D=(id,slot,diet,n,note,ing,spicy)=>({id,slot,diet,n,note,ing,spicy:!!spicy});
+const DISHES=[
+ D('b1','b','veg','Idli, sambar & peanut chutney','Grind batter once, it keeps 3 days.',{idli_rice:60,urad:20,toor:15,onion:30,tomato:30,drumstick:.25,peanut:12}),
+ D('b2','b','veg','Pesarattu with ginger chutney','Andhra green gram dosa, no fermenting.',{green_gram:60,rice:15,onion:30}),
+ D('b3','b','veg','Ragi dosa, peanut chutney & curd','Finger millet for iron and calcium.',{ragi:50,urad:15,peanut:15,curd:100,onion:20}),
+ D('b4','b','veg','Adai with vegetable avial','Four-dal dosa, the protein star.',{rice:30,toor:15,chana_dal:15,urad:10,moong:10,onion:30,carrot:30,beans:30}),
+ D('b5','b','veg','Paneer dosa','Crumbled paneer and capsicum filling.',{idli_rice:50,urad:18,paneer:40,onion:30,capsicum:20}),
+ D('b6','b','veg','Rava upma with peas & curd','Quick weekday breakfast, 15 minutes.',{rava:60,peanut:10,carrot:30,beans:30,peas:20,curd:100}),
+ D('b7','b','veg','Ven pongal & coconut chutney','Moong-heavy pongal, soft for Paati.',{rice:40,moong:30,roasted_chana:15,coconut:.05}),
+ D('b8','b','egg','Muttai dosa','Egg cracked onto the dosa as it cooks.',{idli_rice:50,urad:18,egg:1,onion:30,tomato:30}),
+ D('b9','b','veg','Kuzhi paniyaram & peanut chutney','Kids love these. Uses leftover batter.',{idli_rice:50,urad:18,onion:30,peanut:15}),
+ D('b10','b','veg','Aval upma with curd','Poha, peanuts and peas.',{poha:60,peanut:15,peas:20,onion:30,curd:100}),
+ D('b11','b','veg','Semiya upma & pottukadalai chutney','Roasted gram chutney adds protein.',{vermicelli:60,peas:30,carrot:30,roasted_chana:20,onion:20}),
+ D('b12','b','egg','Egg bhurji with wheat dosa','Weekend breakfast with a protein punch.',{atta:50,egg:2,onion:40,tomato:30}),
+
+ D('l1','l','veg','Sambar rice, beans poriyal & curd','The everyday classic.',{rice:75,toor:30,drumstick:.25,onion:30,tomato:30,beans:80,coconut:.05,curd:100}),
+ D('l2','l','veg','Keerai kootu, rasam, rice & curd','Spinach cooked with moong dal.',{rice:75,moong:30,spinach:100,toor:10,tomato:40,curd:100}),
+ D('l3','l','veg','Paruppu usili & vatha kuzhambu','Steamed chana dal crumble with beans.',{rice:75,chana_dal:30,toor:10,beans:80,brinjal:60,curd:100},1),
+ D('l4','l','veg','Chana kuzhambu & cabbage poriyal','Chickpeas in a tamarind-coconut gravy.',{rice:75,kabuli:40,cabbage:80,tomato:40,onion:40,curd:100},1),
+ D('l5','l','veg','Paneer kurma with jeera rice','Mild coconut kurma, kid friendly.',{rice:75,paneer:60,onion:40,tomato:40,peas:30,curd:100}),
+ D('l6','l','veg','Bisi bele bath & cucumber raita','One-pot rice, dal and vegetables.',{rice:60,toor:35,carrot:30,beans:30,peas:20,curd:100,cucumber:40}),
+ D('l7','l','veg','Lemon rice, green gram sundal & curd','Good lunchbox for school.',{rice:75,peanut:15,chana_dal:10,lemon:.5,green_gram:30,curd:100}),
+ D('l8','l','veg','Kollu rasam, okra poriyal & rice','Horse gram rasam, warming and high fibre.',{rice:75,horsegram:30,tomato:40,okra:80,curd:100},1),
+ D('l9','l','veg','Tomato pappu & potato fry','Andhra-style dal, mild enough for kids.',{rice:75,toor:35,tomato:60,potato:80,curd:100}),
+ D('l10','l','egg','Muttai kuzhambu & beans poriyal','Boiled eggs in a tangy gravy.',{rice:75,egg:1.5,onion:40,tomato:40,beans:60,curd:100},1),
+ D('l11','l','veg','Mor kuzhambu & soya pepper fry','Buttermilk curry with crisp soya chunks.',{rice:75,curd:150,soya:20,onion:30,potato:40}),
+ D('l12','l','nonveg','Chettinad chicken curry & rasam','Keep a milder portion aside for the kids.',{rice:75,chicken:100,onion:50,tomato:40,toor:10},1),
+ D('l13','l','nonveg','Meen kuzhambu & cabbage poriyal','Seer fish in tamarind gravy.',{rice:75,fish:100,tomato:40,onion:30,cabbage:60},1),
+
+ D('d1','d','veg','Chapati & paneer bhurji','Fast, high protein dinner.',{atta:70,paneer:60,onion:40,tomato:40,capsicum:30}),
+ D('d2','d','veg','Chapati & chana masala','Soak chickpeas the night before.',{atta:70,kabuli:40,onion:40,tomato:40},1),
+ D('d3','d','veg','Dosa & tiffin sambar','With pottukadalai chutney.',{idli_rice:60,urad:20,toor:20,onion:30,tomato:30,roasted_chana:15}),
+ D('d4','d','veg','Idiyappam & soya-veg kurma','Coconut kurma with soya chunks.',{rice_flour:60,coconut:.1,potato:50,carrot:30,peas:30,soya:20}),
+ D('d5','d','veg','Ragi mudde & keerai saaru','Karnataka ragi balls with greens dal.',{ragi:70,toor:30,spinach:100,curd:100}),
+ D('d6','d','veg','Wheat dosa & moong dal','Light and quick, no batter needed.',{atta:60,moong:30,onion:30,tomato:30}),
+ D('d7','d','veg','Chapati & soya chunk curry','Top protein-per-rupee dinner.',{atta:70,soya:25,onion:40,tomato:40,peas:20},1),
+ D('d8','d','veg','Onion uttapam & moong kootu','Thick uttapam, mild kootu.',{idli_rice:60,urad:20,onion:40,tomato:40,moong:25}),
+ D('d9','d','veg','Curd rice & green gram sundal','Light dinner, easy on Paati and the kids.',{rice:60,curd:200,green_gram:25,cucumber:30}),
+ D('d10','d','egg','Appam & egg roast','Kerala style, onion-tomato masala.',{rice:60,coconut:.1,egg:1.5,onion:50,tomato:30}),
+ D('d11','d','veg','Chapati & mushroom-paneer pepper fry','Black pepper, curry leaves, quick toss.',{atta:70,mushroom:100,paneer:30,onion:30}),
+ D('d12','d','nonveg','Chapati & chicken pepper fry','Dry, peppery, gym-day favourite.',{atta:70,chicken:100,onion:40},1),
+ D('d13','d','nonveg','Appam & fish molee','Mild coconut fish stew, good for kids.',{rice:60,fish:100,coconut:.1,onion:30}),
+
+ D('s1','s','veg','Kondakadalai sundal','Chickpeas tempered with coconut.',{kabuli:35,coconut:.03}),
+ D('s2','s','veg','Pachai payaru sundal','Whole green gram with coconut.',{green_gram:35,coconut:.03}),
+ D('s3','s','veg','Sprouts chaat','Sprouted moong, onion, tomato, lemon.',{green_gram:30,onion:15,tomato:15,cucumber:20,lemon:.25}),
+ D('s4','s','veg','Pottukadalai & peanut mix','Roasted, salted, grab-and-go.',{roasted_chana:25,peanut:15}),
+ D('s5','s','veg','Ragi malt with milk','Warm and filling after school.',{ragi:25,milk:200}),
+ D('s6','s','veg','Paneer tikka bites','Pan-roasted with curd marinade.',{paneer:50,capsicum:30,curd:20}),
+ D('s7','s','veg','Masala makhana & buttermilk','Light, crunchy, with a few almonds.',{makhana:20,curd:100,almond:10}),
+ D('s8','s','veg','Banana, almonds & milk','No cooking needed.',{banana:1,almond:15,milk:200}),
+ D('s9','s','veg','Moong dal kozhukattai','Steamed dumplings with spiced moong.',{rice_flour:40,moong:20,coconut:.03}),
+ D('s10','s','veg','Kala chana sundal','Black chickpeas, curry leaves, coconut.',{black_chana:35,coconut:.03}),
+ D('s11','s','egg','Pepper boiled egg','Halved eggs, salt and pepper.',{egg:1}),
+
+ D('b13','b','veg','Masala dosa & sambar','Crisp dosa with potato masala.',{idli_rice:60,urad:20,potato:80,onion:30,toor:15,tomato:30}),
+ D('b14','b','veg','Plain dosa & coconut chutney','Add a katori of sambar for more protein.',{idli_rice:60,urad:20,coconut:.08,roasted_chana:10}),
+ D('b15','b','veg','Rava dosa & chutney','No grinding, batter rests 20 minutes.',{rava:40,rice_flour:30,onion:30,roasted_chana:15,coconut:.05}),
+ D('b16','b','veg','Set dosa & vegetable sagu','Soft, spongy dosas, Karnataka style.',{idli_rice:60,urad:15,poha:15,potato:40,carrot:30,peas:30}),
+ D('b17','b','veg','Poori & potato masala','Weekend treat.',{atta:60,potato:100,onion:40,chana_dal:5}),
+ D('b18','b','veg','Medu vada, idli & sambar','Two idlis and one vada.',{idli_rice:40,urad:35,toor:15,onion:30,tomato:30}),
+ D('b19','b','veg','Oats upma with vegetables','Quick, high fibre.',{oats:50,peanut:10,carrot:30,beans:30,onion:30,curd:100}),
+ D('b20','b','veg','Ragi kanji with buttermilk','Cooling millet porridge.',{ragi:40,curd:150,onion:15}),
+ D('l14','l','veg','Vegetable biryani & raita','Weekend lunch, with soya for protein.',{rice:80,soya:15,carrot:30,beans:30,peas:30,onion:40,curd:100}),
+ D('l15','l','veg','Puliyogare & curd','Tamarind rice with peanuts.',{rice:75,peanut:20,chana_dal:10,curd:150}),
+ D('l16','l','veg','Avial, rasam & rice','Mixed vegetables in coconut-curd.',{rice:75,toor:15,carrot:40,beans:40,raw_banana:.3,coconut:.08,curd:120}),
+ D('l17','l','veg','Morkootu, beetroot poriyal & rice','Moong dal with coconut.',{rice:75,moong:30,bottle_gourd:80,beetroot:60,curd:100}),
+ D('l18','l','veg','Rajma kuzhambu & cabbage poriyal','South-style rajma in tamarind gravy.',{rice:75,rajma:35,cabbage:70,tomato:40,onion:30},1),
+ D('d14','d','veg','Masala dosa & chutney','Dinner dosa night.',{idli_rice:60,urad:20,potato:80,onion:30,roasted_chana:15}),
+ D('d15','d','veg','Chapati & vegetable kurma','With paneer cubes in the kurma.',{atta:70,paneer:40,potato:40,carrot:30,peas:30,coconut:.05}),
+ D('d16','d','veg','Wheat rava upma & sambar','Broken wheat, light dinner.',{wheat_rava:60,toor:20,carrot:30,beans:30,onion:30}),
+ D('d17','d','veg','Pesarattu & upma','Andhra MLA pesarattu.',{green_gram:50,rice:10,rava:30,onion:30}),
+ D('d18','d','egg','Egg dosa & tomato chutney','Kids favourite.',{idli_rice:50,urad:18,egg:1,tomato:50,onion:20}),
+ D('d19','d','nonveg','Chicken kothu chapati','Shredded chapati with chicken and egg.',{atta:60,chicken:80,egg:.5,onion:40,tomato:30},1),
+ D('s12','s','veg','Medu vada & chutney','Two small vadas.',{urad:30,roasted_chana:10,coconut:.03}),
+ D('s13','s','veg','Sweet corn sundal','Corn with coconut and peas.',{corn:60,peas:30,coconut:.03}),
+ D('s14','s','veg','Peanut chikki & milk','Store-bought chikki is fine.',{peanut:20,milk:150}),
+ D('s15','s','veg','Fruit with curd','Seasonal fruit in thick curd.',{banana:1,apple:.5,curd:150}),
+
+ D('b21','b','veg','Kambu dosa & peanut chutney','Pearl millet dosa, rich in iron.',{kambu:40,idli_rice:20,urad:15,peanut:15,onion:20}),
+ D('b22','b','veg','Ragi idli & sambar','Ragi mixed into idli batter.',{ragi:30,idli_rice:30,urad:20,toor:15,tomato:30,onion:20}),
+ D('b23','b','veg','Millet pongal & sambar','Foxtail millet with moong.',{millet:40,moong:30,toor:10,tomato:30}),
+ D('b24','b','veg','Kara paniyaram with sprouts','Spicy paniyaram with moong sprouts mixed in.',{idli_rice:45,urad:15,sprouts_pack:40,onion:30},1),
+ D('b25','b','veg','Paneer paratha & curd','Stuffed paratha, weekend style.',{atta:60,paneer:50,onion:20,curd:100}),
+ D('b26','b','veg','Besan chilla & mint chutney','Gram flour pancakes with vegetables.',{besan:50,onion:30,tomato:20,capsicum:20,mint:10}),
+ D('b27','b','veg','Oats idli & coconut chutney','Oats, rava and curd, steamed.',{oats:30,rava:25,curd:60,carrot:20,roasted_chana:10,coconut:.04}),
+ D('b28','b','veg','Appam & vegetable stew','Kerala breakfast with coconut milk stew.',{rice:55,coconut:.12,potato:50,carrot:30,peas:30}),
+ D('b29','b','egg','Egg kothu idli','Leftover idli tossed with egg.',{idli_rice:50,urad:18,egg:1.5,onion:40,tomato:30},1),
+ D('b30','b','veg','Tofu bhurji & wheat dosa','Scrambled tofu, South spices.',{atta:50,tofu:100,onion:30,tomato:30}),
+ D('b31','b','veg','Soya-veg uttapam','Thick uttapam topped with soya granules.',{idli_rice:55,urad:18,soya:15,onion:30,tomato:30,carrot:20}),
+ D('b32','b','veg','Ragi puttu with banana','Steamed ragi with coconut.',{ragi:60,coconut:.05,banana:1,milk:150}),
+
+ D('l19','l','veg','Avarakkai poriyal, rasam & dal rice','Broad beans with coconut.',{rice:75,broad_beans:80,toor:30,tomato:40,curd:100}),
+ D('l20','l','veg','Chow chow kootu & pepper rasam','Mild kootu with moong.',{rice:75,chow_chow:100,moong:30,tomato:30,curd:100}),
+ D('l21','l','veg','Pudalangai kootu & sambar','Snake gourd with chana dal.',{rice:75,snake_gourd:100,chana_dal:30,toor:15,curd:100}),
+ D('l22','l','veg','Thayir sadam & paruppu podi','Curd rice with spiced dal powder.',{rice:70,curd:200,toor:15,roasted_chana:15,cucumber:30}),
+ D('l23','l','veg','Vendhaya kuzhambu & seppankizhangu roast','Fenugreek gravy with arbi fry.',{rice:75,colocasia:100,toor:20,curd:120},1),
+ D('l24','l','veg','Kambu sadam & keerai masiyal','Pearl millet rice with mashed greens.',{kambu:60,spinach:100,moong:25,curd:100}),
+ D('l25','l','veg','Paneer pulao & raita','Mildly spiced, kids like it.',{rice:75,paneer:60,peas:30,carrot:30,curd:120}),
+ D('l26','l','veg','Rajma sundal salad & lemon rice','Rajma tossed with onion and lemon.',{rice:70,rajma:35,onion:30,cucumber:40,peanut:10}),
+ D('l27','l','veg','Ash gourd mor kootu & matta rice','Kerala-style, with buttermilk.',{kerala_rice:75,ash_gourd:100,moong:25,curd:120,coconut:.05}),
+ D('l28','l','veg','Quinoa bisi bele bath','Bisi bele bath made with quinoa.',{quinoa:60,toor:30,carrot:30,beans:30,peas:20,curd:100}),
+ D('l29','l','egg','Egg curry & jeera rice','Simple onion-tomato egg curry.',{rice:75,egg:2,onion:40,tomato:40,curd:100},1),
+ D('l30','l','nonveg','Chicken biryani & raita','Weekend special.',{rice:80,chicken:110,onion:50,curd:120,mint:10},1),
+ D('l31','l','nonveg','Mathi kuzhambu & cabbage thoran','Kerala sardine curry, rich in omega-3.',{kerala_rice:75,sardine:100,tomato:40,cabbage:60,coconut:.05},1),
+ D('l32','l','nonveg','Prawn thokku & rasam rice','Spicy prawn masala.',{rice:75,prawns:100,onion:50,tomato:40,toor:10},1),
+ D('l33','l','nonveg','Mutton kuzhambu & rice','Sunday mutton curry.',{rice:75,mutton:100,onion:50,tomato:40,potato:40},1),
+
+ D('d20','d','veg','Chapati & rajma masala','Soak rajma overnight.',{atta:70,rajma:35,onion:40,tomato:40},1),
+ D('d21','d','veg','Jowar roti & dal fry','Gluten-free dinner.',{jowar:70,toor:30,onion:30,tomato:30}),
+ D('d22','d','veg','Adai & aviyal','Mixed dal dosa for dinner.',{rice:30,toor:15,chana_dal:15,urad:10,moong:10,carrot:40,beans:40,curd:60,coconut:.05}),
+ D('d23','d','veg','Kothu chapati with paneer','Shredded chapati stir-fry.',{atta:70,paneer:60,onion:40,tomato:30,capsicum:20}),
+ D('d24','d','veg','Ragi dosa & kurma','With soya in the kurma.',{ragi:50,urad:15,soya:20,potato:40,peas:30,coconut:.05}),
+ D('d25','d','veg','Idli & sambar','Classic light dinner.',{idli_rice:60,urad:20,toor:25,tomato:40,onion:30,drumstick:.25}),
+ D('d26','d','veg','Chapati & palak paneer','Spinach paneer gravy.',{atta:70,paneer:60,spinach:120,onion:30}),
+ D('d27','d','veg','Millet upma & tofu fry','Foxtail millet upma with pepper tofu.',{millet:60,tofu:80,carrot:30,beans:30,onion:30}),
+ D('d28','d','veg','Chapati & green moong curry','Whole moong in coconut gravy.',{atta:70,green_gram:40,onion:30,tomato:30,coconut:.04}),
+ D('d29','d','egg','Chapati & egg roast','Kerala-style masala eggs.',{atta:70,egg:2,onion:50,tomato:30},1),
+ D('d30','d','egg','Egg uttapam & chutney','Kids favourite.',{idli_rice:55,urad:18,egg:1,onion:30,roasted_chana:10}),
+ D('d31','d','nonveg','Chicken stew & appam','Mild coconut stew.',{rice:60,chicken:100,coconut:.1,potato:40,carrot:30}),
+ D('d32','d','nonveg','Grilled fish & millet dosa','Pan-grilled fish with pepper.',{fish:100,millet:40,urad:15,onion:20}),
+
+ D('s16','s','veg','Sundal chaat with sprouts','Mixed sprouts, onion, lemon.',{sprouts_pack:60,onion:15,tomato:15,lemon:.25}),
+ D('s17','s','veg','Greek yogurt & fruit bowl','With chia and honey.',{greek_yogurt:150,banana:1,chia:5}),
+ D('s18','s','veg','Roasted makhana & peanuts','Ghee-roasted, pepper and salt.',{makhana:20,peanut:20}),
+ D('s19','s','veg','Paneer bhurji sandwich','Whole wheat bread with paneer filling.',{bread:2,paneer:40,onion:15}),
+ D('s20','s','veg','Mor (spiced buttermilk) & dalia','Cooling evening drink.',{buttermilk:250,chickpea_flour_snack:30}),
+ D('s21','s','veg','Dates, walnut & almond bites','No-cook energy balls.',{dates:30,walnut:10,almond:10}),
+ D('s22','s','veg','Soya chunk 65 (air-fried)','Crispy, high protein.',{soya:25,curd:20},1),
+ D('s23','s','veg','Ragi cookies & milk','Store-bought or home-baked.',{ragi:20,milk:200}),
+ D('s24','s','veg','Masala corn & peas','Steamed, butter and pepper.',{corn:60,peas:40}),
+ D('s25','s','veg','Besan dhokla & chutney','Steamed gram flour cake.',{besan:40,curd:30}),
+ D('s26','s','egg','Egg bonda (baked)','Boiled egg in spiced besan, baked.',{egg:1,besan:15}),
+ D('s27','s','veg','Pomegranate & sprouts salad','Crunchy and fresh.',{sprouts_pack:50,pomegranate:.3,cucumber:30}),
+];
+const BYID=Object.fromEntries(DISHES.map(d=>[d.id,d]));
+const BUILTIN=DISHES.length;
+const SLOTS=[['b','Breakfast','7:30'],['l','Lunch','1:00'],['s','Snack','5:00'],['d','Dinner','8:00']];
+const DAYN=['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+const DAYFULL=['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'];
+
+const prot=ing=>Object.entries(ing).reduce((a,[k,q])=>{const i=ING[k];return a+(i[2]==='pc'?q*i[3]:q*i[3]/100)},0);
+function prep(d){d.p=prot(d.ing);d.f=fib(d.ing);d.main=null;let best=0;for(const [k,q] of Object.entries(d.ing)){const v=prot({[k]:q});if(v>best){best=v;d.main=k}}return d}
+DISHES.forEach(prep);
+// Bring the family's own dishes and ingredients into the shared tables
+function syncCustom(){
+  for(const k of Object.keys(ING)) if(!BASE_ING.includes(k)) delete ING[k];
+  for(const [k,v] of Object.entries(S.customIng||{})) ING[k]=v;
+  DISHES.splice(BUILTIN);
+  for(const k of Object.keys(BYID)) if(k.startsWith('c')) delete BYID[k];
+  for(const c of S.custom||[]){const d=prep({...c,ing:{...c.ing},spicy:false,mine:true});DISHES.push(d);BYID[d.id]=d}
+}
+
+const BOOSTS={
+ adult:[{n:'Sprouted moong bowl, 50 g dry',ing:{green_gram:50}},{n:'Paneer cubes, 100 g',ing:{paneer:100}},{n:'Bowl of curd, 200 g',ing:{curd:200}},{n:'Roasted chana, 30 g',ing:{roasted_chana:30}}],
+ other:[{n:'Glass of milk, 200 ml',ing:{milk:200}},{n:'Bowl of curd, 150 g',ing:{curd:150}},{n:'Roasted chana, 30 g',ing:{roasted_chana:30}},{n:'Paneer, 50 g',ing:{paneer:50}}],
+ kid:[{n:'Glass of milk, 150 ml',ing:{milk:150}},{n:'Small bowl of curd, 100 g',ing:{curd:100}},{n:'Roasted chana, 20 g',ing:{roasted_chana:20}}],
+};
+// Every top-up a person can pick; auto top-ups use the BOOSTS order above
+const TOPUPS=[
+ {id:'milk200',n:'Glass of milk, 200 ml',ing:{milk:200}},{id:'milk150',n:'Glass of milk, 150 ml',ing:{milk:150}},
+ {id:'curd200',n:'Bowl of curd, 200 g',ing:{curd:200}},{id:'curd150',n:'Bowl of curd, 150 g',ing:{curd:150}},{id:'curd100',n:'Small bowl of curd, 100 g',ing:{curd:100}},
+ {id:'sprouts50',n:'Sprouted moong bowl, 50 g dry',ing:{green_gram:50}},{id:'sundal40',n:'Chana sundal, 40 g dry',ing:{kabuli:40}},
+ {id:'paneer100',n:'Paneer cubes, 100 g',ing:{paneer:100}},{id:'paneer50',n:'Paneer, 50 g',ing:{paneer:50}},
+ {id:'chana30',n:'Roasted chana, 30 g',ing:{roasted_chana:30}},{id:'chana20',n:'Roasted chana, 20 g',ing:{roasted_chana:20}},
+ {id:'peanut30',n:'Roasted peanuts, 30 g',ing:{peanut:30}},{id:'almond20',n:'Almonds, 20 g',ing:{almond:20}},{id:'pb20',n:'Peanut butter, 2 tbsp',ing:{peanut_butter:32}},
+ {id:'egg1',n:'1 boiled egg',ing:{egg:1}},{id:'egg2',n:'2 boiled eggs',ing:{egg:2}},
+ {id:'soya25',n:'Soya chunks, 25 g dry',ing:{soya:25}},{id:'tofu100',n:'Tofu, 100 g',ing:{tofu:100}},
+ {id:'whey30',n:'Whey protein, 1 scoop (30 g)',ing:{whey:30}},{id:'makhana30',n:'Roasted makhana, 30 g',ing:{makhana:30}},
+ {id:'greek150',n:'Greek yogurt, 150 g',ing:{greek_yogurt:150}},{id:'hung150',n:'Hung curd, 150 g',ing:{hung_curd:150}},
+ {id:'butter250',n:'Glass of buttermilk, 250 ml',ing:{buttermilk:250}},{id:'soymilk250',n:'Soy milk, 250 ml',ing:{soy_milk:250}},
+ {id:'ragimalt',n:'Ragi malt with milk',ing:{ragi:25,milk:200}},{id:'smoothie',n:'Banana-peanut butter smoothie',ing:{banana:1,peanut_butter:16,milk:200}},
+ {id:'egg3w',n:'3 egg whites',ing:{egg:3}},{id:'omelette2',n:'2-egg omelette',ing:{egg:2,onion:20}},
+ {id:'paneer75',n:'Paneer tikka, 75 g',ing:{paneer:75}},{id:'tofu150',n:'Tofu, 150 g',ing:{tofu:150}},
+ {id:'sprouts100',n:'Mixed sprouts, 100 g',ing:{sprouts_pack:100}},{id:'kalachana40',n:'Kala chana sundal, 40 g dry',ing:{black_chana:40}},
+ {id:'soya40',n:'Soya chunks, 40 g dry',ing:{soya:40}},{id:'dalia30',n:'Roasted dalia, 30 g',ing:{chickpea_flour_snack:30}},
+ {id:'pumpkin20',n:'Pumpkin seeds, 20 g',ing:{pumpkin_seeds:20}},{id:'seeds15',n:'Seed mix (flax, chia), 15 g',ing:{flax:8,chia:7}},
+ {id:'walnut20',n:'Walnuts, 20 g',ing:{walnut:20}},{id:'chikki',n:'Peanut chikki, 1 bar',ing:{peanut:20}},
+ {id:'guava1',n:'1 guava',ing:{guava:1}},{id:'guavahalf',n:'Half a guava',ing:{guava:.5}},{id:'apple1',n:'1 apple',ing:{apple:1}},{id:'banana1',n:'1 banana',ing:{banana:1}},
+ {id:'papaya150',n:'Bowl of papaya, 150 g',ing:{papaya:150}},{id:'papaya100',n:'Small bowl of papaya, 100 g',ing:{papaya:100}},{id:'pomhalf',n:'Half a pomegranate',ing:{pomegranate:.5}},{id:'dates3',n:'3 dates',ing:{dates:25}},
+ {id:'salad150',n:'Carrot-cucumber salad, 150 g',ing:{carrot:75,cucumber:75}},{id:'beetsalad',n:'Beetroot-carrot salad, 120 g',ing:{beetroot:60,carrot:60}},{id:'chia10',n:'Chia seeds soaked, 10 g',ing:{chia:10}},
+ {id:'chicken100',n:'Grilled chicken, 100 g',ing:{chicken:100}},{id:'fish100',n:'Grilled fish, 100 g',ing:{fish:100}},
+];
+TOPUPS.forEach(t=>{t.p=prot(t.ing);t.f=fib(t.ing)});
+// Fiber top-ups added after protein when a day is still short on fiber
+const FBOOSTS={adult:['guava1','salad150','papaya150','apple1','chia10'],other:['guava1','salad150','papaya150','apple1','chia10'],kid:['banana1','guavahalf','apple1','papaya100','dates3']};
+const TOPBY=Object.fromEntries(TOPUPS.map(t=>[t.id,t]));
+Object.values(BOOSTS).forEach(list=>list.forEach(b=>{b.id=(TOPUPS.find(t=>t.n===b.n)||{}).id}));
+const descOf=p=>[p.age?`${p.age} yrs`:'',p.weight?`${p.weight} kg`:'',+p.age>=18&&ACTIVITY[p.activity]?ACTIVITY[p.activity][0].toLowerCase():''].filter(Boolean).join(' · ');
+const PANTRY=['Cooking oil','Ghee','Tamarind','Sambar powder','Rasam powder','Turmeric','Red chillies','Mustard seeds','Cumin','Black pepper','Curry leaves','Coriander leaves','Green chillies','Ginger','Garlic','Jaggery','Salt','Hing'];
+
+const ACTIVITY={light:['Mostly sitting',0.83],active:['Active',1.0],gym:['Gym / strength training',1.6]};
+const DEFAULT_PEOPLE=[
+ {id:'p1',name:'Vijay',age:40,sex:'m',weight:62,activity:'gym',eggs:true,milk:false},
+ {id:'p2',name:'Partner',age:38,sex:'f',weight:62,activity:'active',eggs:false,milk:false},
+ {id:'p3',name:'Paati',age:65,sex:'f',weight:55,activity:'light',eggs:false,milk:false},
+ {id:'p4',name:'Daughter',age:10,sex:'f',weight:32,activity:'active',eggs:false,milk:true},
+ {id:'p5',name:'Son',age:4,sex:'m',weight:16,activity:'active',eggs:false,milk:true},
+].map(p=>Object.assign(p,suggest(p)));
+// Suggested protein goal, portion size and top-up style from age, sex, weight and activity
+function suggest(p){
+  const a=+p.age||30,w=+p.weight||0,m=p.sex==='m';
+  let target,basis,mult,boost;
+  if(a<4){target=12.5;basis='ICMR-NIN 2020 recommended intake for children aged 1 to 3.';mult=.35;boost='kid'}
+  else if(a<7){target=16;basis='ICMR-NIN 2020 recommended intake for children aged 4 to 6.';mult=.45;boost='kid'}
+  else if(a<10){target=23;basis='ICMR-NIN 2020 recommended intake for children aged 7 to 9.';mult=.6;boost='kid'}
+  else if(a<13){target=32;basis=`ICMR-NIN 2020 recommended intake for ${m?'boys':'girls'} aged 10 to 12.`;mult=.75;boost='kid'}
+  else if(a<16){target=m?45:44;basis=`ICMR-NIN 2020 recommended intake for ${m?'boys':'girls'} aged 13 to 15.`;mult=m?1:.9;boost='other'}
+  else if(a<18){target=m?55:46;basis=`ICMR-NIN 2020 recommended intake for ${m?'boys':'girls'} aged 16 to 17.`;mult=m?1.15:.95;boost='other'}
+  else{const act=ACTIVITY[p.activity]||ACTIVITY.active;let f=act[1];
+    if(a>=60&&f<1.1){f=1.1;basis='1.0 to 1.2 g per kg is advised after 60 to protect muscle.'}
+    else if(p.activity==='gym')basis='1.6 g per kg of body weight, the usual range for building muscle with strength training.';
+    else if(p.activity==='light')basis='0.83 g per kg, the ICMR-NIN 2020 adult recommendation.';
+    else basis='About 1 g per kg, a little above the ICMR-NIN 0.83 g/kg minimum for active adults.';
+    target=Math.round((w||(m?65:55))*f);if(!w)basis+=` Assumes ${m?65:55} kg; add a weight for a better number.`;
+    mult=a>=60?.85:(m?1.2:1);if(p.activity==='gym')mult+=.15;boost=p.activity==='gym'?'adult':'other'}
+  return {target:Math.round(target),basis,mult:Math.round(mult*100)/100,boost};
+}
+
+// Fiber goal: US IOM adequate intake (14 g per 1000 kcal), by age and sex
+function fiberGoal(p){const a=+p.age||30,m=p.sex==='m';
+  const g=a<4?14:a<7?18:a<9?22:a<14?(m?31:26):a<19?(m?38:26):a<=50?(m?38:25):(m?30:21);
+  return {g,basis:`Fiber goal ${g} g a day, the adequate intake for ${a<18?'this age':m?'men':'women'}${a>50&&a>=18?' over 50':''} (about 14 g per 1000 kcal).`}}
+const fgoal=p=>+p.ftarget>0?+p.ftarget:fiberGoal(p).g;
+
+/* ---------- State ---------- */
+const LS='vaaram.v1';
+let S=load();
+function load(){
+  let s=null;try{s=JSON.parse(localStorage.getItem(LS))}catch(e){}
+  if(!s||!s.people) s={people:DEFAULT_PEOPLE,set:{eggs:true,nonveg:0,vEggs:true,vEggsInList:true,kidsMilk:true},weeks:{},tab:'plan',week:0,day:null,pantry:[]};
+  s.people=s.people.map(p=>{if(p.age!=null)return p;const d=DEFAULT_PEOPLE.find(x=>x.id===p.id)||{};
+    const q={...d,...p,age:d.age,sex:d.sex,weight:d.weight,activity:d.activity,eggs:p.id==='p1'?(s.set.vEggs!==false):!!d.eggs,milk:(p.id==='p4'||p.id==='p5')?(s.set.kidsMilk!==false):!!d.milk};q.basis=suggest(q).basis;return q});
+  s.custom=s.custom||[];s.customIng=s.customIng||{};s.hidden=s.hidden||[];
+  return s;
+}
+function save(){try{localStorage.setItem(LS,JSON.stringify(S))}catch(e){}}
+
+function monday(offset){
+  const t=new Date();t.setHours(0,0,0,0);
+  const dow=(t.getDay()+6)%7; // Mon=0
+  const m=new Date(t);m.setDate(t.getDate()-dow+(dow===0?0:7)+offset*7);
+  return m;
+}
+const keyOf=d=>d.toISOString().slice(0,10);
+const fmt=(d,o)=>d.toLocaleDateString('en-IN',o);
+
+function rng(seed){return function(){seed|=0;seed=seed+0x6D2B79F5|0;let t=Math.imul(seed^seed>>>15,1|seed);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+function hash(str){let h=2166136261;for(const c of str){h^=c.charCodeAt(0);h=Math.imul(h,16777619)}return h>>>0}
+function shuffle(a,r){a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(r()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
+const allowed=d=>!(S.hidden||[]).includes(d.id)&&(d.diet==='veg'||(d.diet==='egg'&&S.set.eggs)||(d.diet==='nonveg'&&S.set.nonveg>0));
+
+function genPlan(seed){
+  const r=rng(seed);
+  const pool=s=>{const ok=DISHES.filter(d=>d.slot===s&&!(S.hidden||[]).includes(d.id)&&(d.diet==='veg'||(d.diet==='egg'&&S.set.eggs)));return shuffle(ok.length?ok:DISHES.filter(d=>d.slot===s&&d.diet==='veg'),r)};
+  const P={b:pool('b'),l:pool('l'),s:pool('s'),d:pool('d')};
+  // egg breakfasts read better on weekends: push them later in the order
+  P.b.sort((a,b)=>(a.diet==='egg')-(b.diet==='egg'));
+  const plan=DAYN.map((_,i)=>({b:P.b[i%P.b.length].id,l:P.l[i%P.l.length].id,s:P.s[i%P.s.length].id,d:P.d[i%P.d.length].id}));
+  if(S.set.eggs){ // move an egg breakfast onto Saturday/Sunday if one landed on a weekday
+    const eggB=P.b.filter(d=>d.diet==='egg').map(d=>d.id);
+    eggB.slice(0,2).forEach((id,k)=>{plan[5+k].b=id});
+  }
+  const nv=Math.min(S.set.nonveg,7);
+  if(nv>0){
+    const days=shuffle([0,1,2,3,4,5,6],r).slice(0,nv);
+    const nl=shuffle(DISHES.filter(d=>d.slot==='l'&&d.diet==='nonveg'),r), nd=shuffle(DISHES.filter(d=>d.slot==='d'&&d.diet==='nonveg'),r);
+    days.forEach((day,k)=>{ if(k%2===0) plan[day].l=nl[(k/2)%nl.length].id; else plan[day].d=nd[((k-1)/2)%nd.length].id; });
+  }
+  // avoid the same main protein at lunch and dinner on one day
+  for(let i=0;i<7;i++){ if(BYID[plan[i].l].main===BYID[plan[i].d].main){ const j=(i+3)%7; [plan[i].d,plan[j].d]=[plan[j].d,plan[i].d]; } }
+  return plan;
+}
+function week(){
+  const k=keyOf(monday(S.week));
+  if(!S.weeks[k]) S.weeks[k]={plan:genPlan(hash(k)),checked:{}};
+  const w=S.weeks[k];
+  w.plan.forEach(day=>SLOTS.forEach(([s])=>{if(!BYID[day[s]]){const alt=DISHES.find(d=>d.slot===s&&d.diet==='veg');day[s]=alt.id}}));
+  return w;
+}
+
+/* ---------- Protein maths ---------- */
+function extras(person,dayIdx){
+  const out=[];
+  if(person.eggs&&dayIdx<5) out.push({n:'2 eggs + 4 egg whites (weekday routine)',p:2*6.3+4*3.6,f:0,ing:S.set.vEggsInList?{egg:6}:{} ,fixed:true});
+  if(person.milk) out.push({n:'Morning glass of milk, 200 ml',p:6.4,f:0,ing:{milk:200},fixed:true});
+  return out;
+}
+function dayProtein(plan,i){
+  const day=plan[i];
+  const meals=SLOTS.reduce((a,[s])=>a+BYID[day[s]].p,0), mealsF=SLOTS.reduce((a,[s])=>a+BYID[day[s]].f,0);
+  return S.people.map(p=>{
+    let total=meals*p.mult, fiber=mealsF*p.mult; const items=[], fg=fgoal(p);
+    for(const e of extras(p,i)){total+=e.p;fiber+=e.f||0;items.push(e)}
+    const add=t=>{total+=t.p;fiber+=t.f;items.push({id:t.id,n:t.n,p:t.p,f:t.f,ing:t.ing,pick:true})};
+    const ov=((week().topups||{})[i]||{})[p.id];
+    if(ov){for(const id of ov){const t=TOPBY[id];if(t)add(t)}}
+    else{const list=BOOSTS[p.boost]||BOOSTS.other; let k=0;
+      while(total<p.target*0.95&&k<list.length){const t=TOPBY[list[k++].id];if(t)add(t)}
+      const fl=FBOOSTS[p.boost]||FBOOSTS.other; k=0;
+      const fcap=p.boost==='kid'?2:3;
+      while(fiber<fg*0.9&&k<Math.min(fcap,fl.length)){const t=TOPBY[fl[k++]];if(t)add(t)}}
+    return {person:p,meals:meals*p.mult,total,fiber,fgoal:fg,fok:fiber>=fg*0.9,items,ok:total>=p.target*0.95,custom:!!ov};
+  });
+}
+
+/* ---------- Groceries ---------- */
+function groceries(){
+  const w=week(),plan=w.plan, fam=S.people.reduce((a,p)=>a+p.mult,0), need={};
+  const add=(ing,m)=>{for(const [k,q] of Object.entries(ing)) need[k]=(need[k]||0)+q*m};
+  plan.forEach((day,i)=>{ SLOTS.forEach(([s])=>add(BYID[day[s]].ing,fam)); dayProtein(plan,i).forEach(r=>r.items.forEach(it=>add(it.ing,1))); });
+  const items=Object.entries(need).filter(([,q])=>q>0).map(([k,q])=>{
+    const [name,cat,unit,,pack,search]=ING[k]; const packs=unit==='pc'?Math.ceil(q/pack-0.001):Math.ceil(q/pack-0.08);
+    return {k,name,cat,unit,need:q,pack,packs:Math.max(1,packs),search};
+  });
+  S.pantry.forEach(n=>items.push({k:'pantry:'+n,name:n,cat:'Pantry top-ups',unit:'',need:0,pack:0,packs:1,search:n.toLowerCase()}));
+  return items;
+}
+const qty=(q,unit)=>unit==='pc'?`${Math.ceil(q)}`:unit==='ml'?(q>=1000?`${(q/1000).toFixed(1).replace(/\.0$/,'')} L`:`${Math.round(q/50)*50} ml`):(q>=1000?`${(q/1000).toFixed(1).replace(/\.0$/,'')} kg`:`${Math.max(10,Math.round(q/10)*10)} g`);
+function buyLabel(it){
+  if(!it.unit) return 'Check pantry';
+  if(it.unit==='pc'){ if(it.k==='coconut') return `${it.packs} coconut${it.packs>1?'s':''}`; const n=it.packs*it.pack; return it.k==='egg'?`${n} eggs`:`${Math.ceil(it.need)} pcs`; }
+  const packL=qty(it.pack,it.unit);
+  return `${it.packs} × ${packL}`;
+}
+
+/* ---------- Rendering ---------- */
+const $=s=>document.querySelector(s); const app=$('#app');
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+function ring(val,target,size=64){
+  const r=26,c=2*Math.PI*r,f=Math.min(1,val/target),col=val>=target*0.95?'var(--ok)':'var(--warn)';
+  return `<svg class="ring" viewBox="0 0 64 64" width="${size}" height="${size}" role="img" aria-label="${Math.round(val)} of ${target} grams">
+  <circle cx="32" cy="32" r="${r}" fill="none" stroke="var(--surface-2)" stroke-width="7"/>
+  <circle cx="32" cy="32" r="${r}" fill="none" stroke="${col}" stroke-width="7" stroke-linecap="round" stroke-dasharray="${c*f} ${c}" transform="rotate(-90 32 32)"/>
+  <text x="32" y="36" text-anchor="middle" font-size="14">${Math.round(val)}</text></svg>`;
+}
+function todayIdx(){const m=monday(S.week),t=new Date();t.setHours(0,0,0,0);const d=Math.round((t-m)/864e5);return d>=0&&d<7?d:-1}
+
+function renderPlan(){
+  const w=week(),plan=w.plan; if(S.day==null) S.day=Math.max(0,todayIdx());
+  const i=S.day, m=monday(S.week), date=new Date(m); date.setDate(m.getDate()+i);
+  const prot=dayProtein(plan,i), tIdx=todayIdx();
+  const tomorrow=plan[i+1]; const prep=[];
+  if(tomorrow){
+    const soak=new Set();SLOTS.forEach(([s])=>Object.keys(BYID[tomorrow[s]].ing).forEach(k=>SOAK[k]&&soak.add(SOAK[k])));
+    if(soak.size) prep.push(`Soak ${[...soak].join(' and ')} tonight.`);
+    if(SLOTS.some(([s])=>BYID[tomorrow[s]].ing.idli_rice)) prep.push('Tomorrow uses idli/dosa batter. Grind today or check the fridge batter.');
+    if(SLOTS.some(([s])=>BYID[tomorrow[s]].ing.chicken||BYID[tomorrow[s]].ing.fish)) prep.push('Move tomorrow’s chicken or fish to the fridge to thaw.');
+  }
+  if(!prep.length) prep.push(i===6?'Sunday: check the grocery list for next week.':'Nothing to soak tonight.');
+  const allDays=plan.map((_,d)=>dayProtein(plan,d));
+  app.innerHTML=`<section class="view">
+    <div class="days" role="group" aria-label="Day">${DAYN.map((d,k)=>{const dd=new Date(m);dd.setDate(m.getDate()+k);
+      return `<button class="day" data-day="${k}" aria-pressed="${k===i}"><small>${d}</small><b>${dd.getDate()}</b><span class="dots" aria-hidden="true">${allDays[k].map(r=>`<i class="${r.ok&&r.fok?'':'low'}"></i>`).join('')}</span></button>`}).join('')}</div>
+    <div class="dayhead"><div><h2>${DAYFULL[i]}${i===tIdx?' · today':''}</h2><p>${fmt(date,{day:'numeric',month:'long'})} · tap ↻ on any meal to swap it</p></div>
+      <div class="row" style="gap:8px"><button class="btn" id="sharePlan">Share week</button><a class="btn" target="_blank" rel="noopener" href="https://wa.me/?text=${encodeURIComponent(planText())}">WhatsApp</a><button class="btn" id="printPlan">${CAN_PRINT?'Print week':'Print / PDF'}</button><button class="btn" id="reshuffle">↻ Reshuffle</button></div></div>
+    <div class="meals">${SLOTS.map(([s,label,time])=>{const d=BYID[plan[i][s]];return `<article class="meal" id="meal-${s}" style="--c:var(--${s})">
+      <div class="slot"><span><i style="background:var(--${s})"></i>${label}</span><span>${time}</span></div>
+      <h3>${esc(d.n)}</h3><p class="measure" title="One adult portion">${esc(measureOf(d))}</p><p class="note">${esc(d.note)}</p>
+      <div class="foot"><span class="chips"><span class="pchip">${Math.round(d.p)} g protein</span><span class="fchip">${Math.round(d.f)} g fiber</span></span>${d.mine?'<span class="mytag">my dish</span>':''}${d.diet==='nonveg'?'<span class="tag nv">non-veg</span>':d.diet==='egg'?'<span class="tag">egg</span>':''}${d.spicy?'<span class="tag" title="Keep a mild portion aside for the 4-year-old">spicy</span>':''}
+      <button class="swap" data-swap="${s}" aria-label="Swap ${label}">↻ Swap</button></div></article>`}).join('')}</div>
+    <p class="small muted" style="margin:-8px 0 0">Protein and fiber shown are for one adult portion. Each person's share is scaled to their portion size.</p>
+    <div class="split">
+      <div class="panel"><h3>Protein &amp; fiber on ${DAYFULL[i]}</h3>
+        <div class="who">${prot.map(r=>`<div class="person">${ring(r.total,r.person.target)}<b>${esc(r.person.name)}</b><small>goal ${r.person.target} g</small><span class="fbar ${r.fok?'':'low'}" title="Fiber ${Math.round(r.fiber)} of ${r.fgoal} g"><i style="width:${Math.min(100,r.fiber/r.fgoal*100)}%"></i></span><small>fiber ${Math.round(r.fiber)}/${r.fgoal} g</small></div>`).join('')}</div>
+        <h3 style="margin-top:16px">Top-ups</h3>
+        <p class="small muted" style="margin:0 0 8px">Suggested to reach each protein and fiber goal. Change, remove or add any of them; they go on the shopping list.</p>
+        <div class="tops">${prot.map(r=>{const pid=r.person.id;const picks=r.items.filter(it=>it.pick);const gap=Math.round(r.person.target-r.total),fgap=Math.round(r.fgoal-r.fiber);
+          return `<div class="top"><div class="tophead"><b>${esc(r.person.name)}</b><span class="small ${r.ok?'ok':'low'}">Protein ${Math.round(r.total)}/${r.person.target} g${r.ok?' ✓':` · ${gap} g short`}</span><span class="small ${r.fok?'ok':'low'}">Fiber ${Math.round(r.fiber)}/${r.fgoal} g${r.fok?' ✓':` · ${fgap} g short`}</span>${r.custom?`<button class="linkbtn" data-topreset="${pid}">Use suggestions</button>`:''}</div>
+          ${r.items.filter(it=>it.fixed).map(it=>`<div class="toprow fixed"><span>${esc(it.n)}</span><span class="pchip">+${Math.round(it.p)} g</span></div>`).join('')}
+          ${picks.map((it,k)=>`<div class="toprow"><label for="tp-${pid}-${k}" hidden>Top-up</label><select id="tp-${pid}-${k}" data-tp="${pid}" data-tpi="${k}">${TOPUPS.map(t=>`<option value="${t.id}" ${t.id===it.id?'selected':''}>${esc(t.n)} · ${Math.round(t.p)} g protein, ${Math.round(t.f)} g fiber</option>`).join('')}</select><button class="x" data-tpdel="${pid}" data-tpi="${k}" aria-label="Remove top-up">×</button></div>`).join('')}
+          <button class="linkbtn" data-tpadd="${pid}">+ Add a top-up</button></div>`}).join('')}</div>
+      </div>
+      <div class="panel"><h3>Prep for tomorrow</h3><ul class="list prep">${prep.map(p=>`<li><span class="v" style="color:var(--ink)">${esc(p)}</span></li>`).join('')}</ul>
+        <h3 style="margin-top:16px">For the little one</h3><p class="small muted" style="margin:0">Keep the son's portion before adding extra chilli. Soft options this week: ${[...new Set(plan.flatMap(d=>[d.b,d.d]).map(id=>BYID[id]).filter(d=>!d.spicy).map(d=>d.n.split(/[,&]/)[0].trim()))].slice(0,4).join(', ')}.</p></div>
+    </div>
+    <div><h3 style="font-size:1.2rem;margin-bottom:10px">Week at a glance</h3>
+    <div class="tablewrap"><table><thead><tr><th></th>${DAYN.map((d,k)=>`<th class="${k===i?'today-col':''}">${d}</th>`).join('')}</tr></thead>
+    <tbody>${SLOTS.map(([s,label])=>`<tr><th><i style="display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--${s});margin-right:6px"></i>${label}</th>${plan.map((d,k)=>`<td class="cell ${k===i?'today-col':''}" data-day="${k}">${esc(BYID[d[s]].n)}</td>`).join('')}</tr>`).join('')}</tbody></table></div></div>
+  </section>`;
+}
+
+function renderProtein(){
+  const plan=week().plan; const all=plan.map((_,d)=>dayProtein(plan,d)); const sel=S.day??Math.max(0,todayIdx());
+  app.innerHTML=`<section class="view"><div class="dayhead"><div><h2>Protein &amp; fiber for the week</h2><p>Each bar is one day's total, with its number on top. The big number is the 7-day average. ${DAYN[S.day??0]} is highlighted, matching the Week plan tab.</p></div></div>
+  <div class="pgrid">${S.people.map((p,pi)=>{const vals=all.map(d=>d[pi]);const avg=vals.reduce((a,v)=>a+v.total,0)/7;const max=Math.max(p.target*1.25,...vals.map(v=>v.total));
+    const fromMeals=vals.reduce((a,v)=>a+v.meals,0)/7;const fg=fgoal(p),favg=vals.reduce((a,v)=>a+v.fiber,0)/7,fmax=Math.max(fg*1.25,...vals.map(v=>v.fiber));
+    return `<article class="pcard"><header><div><h3>${esc(p.name)}</h3><div class="meta">${esc(descOf(p))} · goal ${p.target} g/day</div></div><div class="big">${Math.round(avg)}<small> g · 7-day avg</small></div></header>
+    <div class="bars"><div class="tl" style="bottom:${p.target/max*84}px"></div>${vals.map((v,k)=>`<div class="bar ${v.ok?'':'low'} ${k===sel?'sel':''}" style="height:${v.total/max*84}px" title="${Math.round(v.total)} g"><span>${Math.round(v.total)}</span></div>`).join('')}</div>
+    <div class="blabels">${DAYN.map((d,k)=>`<span class="${k===sel?'sel':''}">${d}</span>`).join('')}</div>
+    <p class="basis">${Math.round(fromMeals)} g a day comes from shared meals; the rest from ${p.eggs?'eggs and top-ups':p.milk?'milk and top-ups':'top-ups'}. ${esc(p.basis)}</p>
+    <header class="fhead"><div><b>Fiber</b><div class="meta">goal ${fg} g/day</div></div><div class="big">${Math.round(favg)}<small> g · 7-day avg</small></div></header>
+    <div class="bars fiber"><div class="tl" style="bottom:${fg/fmax*84}px"></div>${vals.map((v,k)=>`<div class="bar ${v.fok?'':'low'} ${k===sel?'sel':''}" style="height:${v.fiber/fmax*84}px" title="${Math.round(v.fiber)} g fiber"><span>${Math.round(v.fiber)}</span></div>`).join('')}</div>
+    <div class="blabels">${DAYN.map((d,k)=>`<span class="${k===sel?'sel':''}">${d}</span>`).join('')}</div>
+    <p class="basis">${esc(fiberGoal(p).basis)}${+p.ftarget>0?' You set your own goal.':''}</p></article>`}).join('')}</div>
+  <div class="callout"><p><b>How this is counted.</b> Each dish's protein is added up from its raw ingredients (for example toor dal 22 g per 100 g, paneer 18 g, egg 6.3 g). Everyone eats the same dishes in different portion sizes, which you can change under Family &amp; diet. When a day falls short, the plan adds the cheapest everyday top-up, and those go onto the grocery list too.</p><p><b>Fiber</b> is counted the same way (for example atta 11 g per 100 g, toor dal 9 g, guava 5 g each). If a day is still low on fiber after protein, the plan adds a fruit or salad. Goals follow the adequate intake of about 14 g per 1000 kcal; ICMR-NIN 2020 suggests up to 40 g a day for adults.</p></div>
+  </section>`;
+}
+
+function renderGroceries(){
+  const w=week(),items=groceries();
+  const byCat={};items.forEach(it=>(byCat[it.cat]=byCat[it.cat]||[]).push(it));
+  const done=items.filter(it=>w.checked[it.k]).length;
+  const m=monday(S.week),end=new Date(m);end.setDate(m.getDate()+6);
+  app.innerHTML=`<section class="view">
+   <div class="dayhead"><div><h2>Shopping list</h2><p>${items.length} items for ${fmt(m,{day:'numeric',month:'short'})} to ${fmt(end,{day:'numeric',month:'short'})} · ${done} bought</p></div>
+     <div class="row" style="gap:8px"><button class="btn" id="clearChecks">Untick all</button></div></div>
+   <div class="callout"><h3 style="font-size:1.1rem">Send the list</h3>
+     <p>Tick items as you buy them. Copy or share what's left, to WhatsApp or whoever is doing the shopping, and paste it into BigBasket, Zepto, Blinkit or Instamart.</p>
+     <div class="row" style="gap:8px"><button class="btn gold" id="shareList">Share list</button><button class="btn" id="copyList">Copy list</button><a class="btn" id="waList" target="_blank" rel="noopener" href="https://wa.me/?text=${encodeURIComponent('Groceries for the week\n'+listText(items))}">Send on WhatsApp</a></div></div>
+   <div class="cats">${CAT_ORDER.filter(c=>byCat[c]).map(c=>`<div class="cat"><h3>${c}<small>${byCat[c].length}</small></h3>${byCat[c].sort((a,b)=>a.name.localeCompare(b.name)).map(it=>`
+     <label class="item ${w.checked[it.k]?'done':''}"><input type="checkbox" data-check="${esc(it.k)}" ${w.checked[it.k]?'checked':''} aria-label="Bought ${esc(it.name)}">
+       <span style="min-width:0"><div class="nm">${esc(it.name)}</div><div class="q">${it.unit?`Buy ${buyLabel(it)} · need ${qty(it.need,it.unit)}`:'From your pantry check'}</div></span></label>`).join('')}</div>`).join('')}</div>
+   <div class="panel"><h3>Pantry check</h3><p class="small muted" style="margin:0 0 10px">Tap anything that is running low and it joins the list.</p>
+     <div class="pantry">${PANTRY.map(n=>`<button data-pantry="${esc(n)}" aria-pressed="${S.pantry.includes(n)}">${esc(n)}</button>`).join('')}</div></div>
+  </section>`;
+}
+const listText=items=>{const w=week();return items.filter(it=>!w.checked[it.k]).map(it=>`- ${it.name}${it.unit?`: ${buyLabel(it)}`:''}`).join('\n')};
+
+
+function renderFamily(){
+  app.innerHTML=`<section class="view">
+  <div class="dayhead"><div><h2>Family &amp; diet</h2><p>Changes to diet rebuild this week's plan. Names, portions and goals update instantly.</p></div></div>
+  <div class="panel" style="display:grid;gap:14px"><h3>Diet</h3>
+    <label class="toggle"><input type="checkbox" id="eggs" ${S.set.eggs?'checked':''}> Include egg dishes in family meals</label>
+    <div class="toggle" style="flex-wrap:wrap">Chicken or fish meals per week <span class="seg" role="group" aria-label="Non-veg meals per week">${[0,1,2,3,4].map(n=>`<button data-nv="${n}" aria-pressed="${S.set.nonveg===n}">${n}</button>`).join('')}</span></div>
+    <label class="toggle"><input type="checkbox" id="vEggsInList" ${S.set.vEggsInList?'checked':''}> Add weekday eggs to the shopping list</label>
+  </div>
+  <div class="dayhead"><div><h2 style="font-size:1.35rem">Members · ${S.people.length}</h2><p>Goals and portion sizes are suggested from age, weight and activity. You can override them.</p></div><button class="btn primary" id="addMember">+ Add member</button></div>
+  <div class="fam">${S.people.map((p,i)=>{const sg=suggest(p);return `<div class="panel member" style="display:grid;gap:10px" id="mem-${p.id}">
+    <div class="row" style="align-items:end"><div class="field" style="flex:2"><label for="n${i}">Name</label><input id="n${i}" data-pf="name" data-i="${i}" value="${esc(p.name)}"></div>
+      <button class="btn" data-delmem="${p.id}" ${S.people.length<2?'disabled':''}>Delete</button></div>
+    <div class="row"><div class="field"><label for="a${i}">Age</label><input id="a${i}" type="number" min="1" max="110" data-pf="age" data-i="${i}" value="${p.age??''}"></div>
+      <div class="field"><label for="s${i}">Sex</label><select id="s${i}" data-pf="sex" data-i="${i}"><option value="f" ${p.sex==='f'?'selected':''}>Female</option><option value="m" ${p.sex==='m'?'selected':''}>Male</option></select></div>
+      <div class="field"><label for="w${i}">Weight (kg)</label><input id="w${i}" type="number" min="5" max="200" data-pf="weight" data-i="${i}" value="${p.weight??''}"></div></div>
+    ${(+p.age||30)>=18?`<div class="field"><label for="ac${i}">Activity</label><select id="ac${i}" data-pf="activity" data-i="${i}">${Object.entries(ACTIVITY).map(([k,[l]])=>`<option value="${k}" ${p.activity===k?'selected':''}>${l}</option>`).join('')}</select></div>`:''}
+    <div class="row"><div class="field"><label for="t${i}">Protein goal (g/day)</label><input id="t${i}" type="number" min="5" max="250" data-pf="target" data-i="${i}" value="${p.target}"></div>
+    <div class="field"><label for="f${i}">Fiber goal (g/day)</label><input id="f${i}" type="number" min="5" max="80" data-pf="ftarget" data-i="${i}" value="${+p.ftarget>0?p.ftarget:''}" placeholder="${fiberGoal(p).g} suggested"></div>
+    <div class="field"><label for="m${i}">Portion size</label><select id="m${i}" data-pf="mult" data-i="${i}">${[...new Set([.35,.4,.45,.5,.6,.75,.85,.9,.95,1,1.15,1.2,1.25,1.35,1.5,p.mult])].sort((x,y)=>x-y).map(v=>`<option value="${v}" ${v===p.mult?'selected':''}>${v===1?'1 adult':v+' ×'}</option>`).join('')}</select></div></div>
+    ${(sg.target!==p.target||sg.mult!==p.mult)?`<p class="small" style="margin:0">Suggested: ${sg.target} g a day, portion ${sg.mult}× <button class="linkbtn" data-usesug="${i}">Use suggested</button></p>`:''}
+    <label class="toggle small"><input type="checkbox" data-pf="eggs" data-i="${i}" ${p.eggs?'checked':''}> Has 2 eggs + 4 egg whites on weekdays</label>
+    <label class="toggle small"><input type="checkbox" data-pf="milk" data-i="${i}" ${p.milk?'checked':''}> Has a glass of milk every morning</label>
+    <p class="basis">${esc(p.basis||sg.basis)} ${esc(fiberGoal(p).basis)}</p></div>`}).join('')}</div>
+  <div class="row"><button class="btn" id="resetAll">Reset everything</button><span class="small muted" id="resetNote" style="align-self:center"></span></div>
+  </section>`;
+}
+
+/* ---------- My dishes ---------- */
+let draft=null;
+const blankDraft=()=>({id:null,n:'',slot:'d',diet:'veg',note:'',rows:[{k:'',q:''},{k:'',q:''},{k:'',q:''}]});
+const unitOf=k=>k==='__other'?'g':(ING[k]?ING[k][2]:'g');
+const unitTxt=u=>u==='pc'?'pcs':u;
+function draftIng(){const ing={};for(const r of draft.rows){const q=parseFloat(r.q);if(!r.k||!(q>0))continue;
+  if(r.k==='__other'){if(!r.on||!(parseFloat(r.op)>=0))continue;ing['__o:'+r.on]=(ing['__o:'+r.on]||0)+q}else ing[r.k]=(ing[r.k]||0)+q}return ing}
+function draftProtein(){let p=0;for(const r of draft.rows){const q=parseFloat(r.q);if(!(q>0)||!r.k)continue;
+  if(r.k==='__other'){const op=parseFloat(r.op);if(op>=0)p+=q*op/100}else p+=prot({[r.k]:q})}return p}
+function rowFiber(r){const q=parseFloat(r.q);if(!(q>0)||!r.k)return null;if(r.k==='__other'){const of=parseFloat(r.of);return of>=0?q*of/100:0}return fib({[r.k]:q})}
+const pvText=r=>{const p=rowProtein(r);if(p==null)return '';const f=rowFiber(r)||0;return `${p.toFixed(1)} g protein · ${f.toFixed(1)} g fiber`};
+function draftFiber(){return draft.rows.reduce((a,r)=>a+(rowFiber(r)||0),0)}
+function rowProtein(r){const q=parseFloat(r.q);if(!(q>0)||!r.k)return null;if(r.k==='__other'){const op=parseFloat(r.op);return op>=0?q*op/100:null}return prot({[r.k]:q})}
+function ingOptions(sel){
+  const groups={};Object.entries(ING).forEach(([k,v])=>(groups[v[1]]=groups[v[1]]||[]).push([k,v]));
+  return `<option value="">Choose ingredient…</option>`+CAT_ORDER.filter(c=>groups[c]).map(c=>`<optgroup label="${c}">${groups[c].sort((a,b)=>a[1][0].localeCompare(b[1][0])).map(([k,v])=>`<option value="${k}" ${k===sel?'selected':''}>${esc(v[0])} · ${v[3]} g protein per ${v[2]==='pc'?'piece':'100 '+v[2]}</option>`).join('')}</optgroup>`).join('')+`<option value="__other" ${sel==='__other'?'selected':''}>Something else (enter its protein)</option>`;
+}
+function tallyHTML(){const p=draftProtein();const m=measureOf({id:'',n:draft.n||'',ing:draftIng()});return `<div><div class="small muted">Per adult portion${m?' · ≈ '+esc(m):''}</div><div class="big">${Math.round(p)}<small> g protein</small></div><div class="small" style="font-weight:700">${Math.round(draftFiber())} g fiber</div></div>
+  <div class="who2">${S.people.map(x=>`<span><b>${esc(x.name)}</b> ${Math.round(p*x.mult)} g</span>`).join('')}</div>`}
+function renderDishes(){
+  if(!draft) draft=blankDraft();
+  const mine=S.custom||[];
+  app.innerHTML=`<section class="view">
+  <div class="dayhead"><div><h2>${draft.id?'Edit dish':'Add your own dish'}</h2><p>Pick ingredients and amounts for one adult portion. Protein is worked out from a built-in nutrition table as you type.</p></div></div>
+  <form class="panel builder" id="dishForm" novalidate>
+    <div class="row">
+      <div class="field" style="flex:2;min-width:200px"><label for="dn">Dish name</label><input id="dn" data-d="n" value="${esc(draft.n)}" placeholder="e.g. Amma's drumstick sambar" required></div>
+      <div class="field"><label for="ds">Meal</label><select id="ds" data-d="slot">${SLOTS.map(([k,l])=>`<option value="${k}" ${draft.slot===k?'selected':''}>${l}</option>`).join('')}</select></div>
+      <div class="field"><label for="dd">Type</label><select id="dd" data-d="diet">${[['veg','Vegetarian'],['egg','Has egg'],['nonveg','Non-veg']].map(([k,l])=>`<option value="${k}" ${draft.diet===k?'selected':''}>${l}</option>`).join('')}</select></div>
+    </div>
+    <div class="field"><label for="dnote">Note (optional)</label><input id="dnote" data-d="note" value="${esc(draft.note)}" placeholder="e.g. Use the pressure cooker, 3 whistles"></div>
+    <div><div class="small muted" style="margin-bottom:6px">Ingredients for one adult portion</div>
+    <div class="ingrows">${draft.rows.map((r,i)=>{const pv=rowProtein(r);return `<div class="ingrow">
+      <div class="field"><label class="small" for="ik${i}" hidden>Ingredient ${i+1}</label><select id="ik${i}" data-row="${i}" data-f="k">${ingOptions(r.k)}</select></div>
+      <div class="field unitwrap"><label for="iq${i}" hidden>Amount</label><input id="iq${i}" type="number" inputmode="decimal" min="0" step="any" data-row="${i}" data-f="q" value="${esc(r.q)}" placeholder="0"><span>${unitTxt(unitOf(r.k))}</span></div>
+      <button type="button" class="x" data-delrow="${i}" aria-label="Remove ingredient">×</button>
+      ${r.k==='__other'?`<div class="other"><div class="field"><label for="on${i}">Ingredient name</label><input id="on${i}" data-row="${i}" data-f="on" value="${esc(r.on||'')}" placeholder="e.g. Mochai (field beans)"></div>
+        <div class="field"><label for="op${i}">Protein per 100 g</label><input id="op${i}" type="number" min="0" step="any" data-row="${i}" data-f="op" value="${esc(r.op??'')}" placeholder="from the pack label"></div>
+        <div class="field"><label for="of${i}">Fiber per 100 g</label><input id="of${i}" type="number" min="0" step="any" data-row="${i}" data-f="of" value="${esc(r.of??'')}" placeholder="optional"></div></div>`:''}
+      <div class="pv" id="pv${i}">${pvText(r)}</div></div>`}).join('')}</div>
+    <div style="margin-top:8px"><button type="button" class="btn" id="addRow">+ Add ingredient</button></div></div>
+    <div class="tally" id="tally" aria-live="polite">${tallyHTML()}</div>
+    <p class="small muted" style="margin:0">Handy portions: 1 katori dal is about 30 g dry, 1 katori curd about 150 g, 2 chapatis use about 70 g atta, 1 cup cooked rice is about 75 g raw.</p>
+    <div class="row" style="gap:8px"><button type="submit" class="btn primary">${draft.id?'Save changes':'Save dish'}</button>${draft.id?'<button type="button" class="btn" id="cancelEdit">Cancel</button>':''}<span class="small" id="formMsg" style="align-self:center;color:var(--chili)"></span></div>
+  </form>
+  <div><h3 style="font-size:1.2rem;margin-bottom:10px">My dishes${mine.length?` · ${mine.length}`:''}</h3>
+  ${mine.length?`<div class="mine">${mine.map(c=>{const d=BYID[c.id];const lbl=SLOTS.find(x=>x[0]===c.slot)[1];return `<article class="mydish"><div style="min-width:0"><h3>${esc(c.n)}</h3>
+    <div class="small muted">${lbl} · ${c.diet==='veg'?'vegetarian':c.diet==='egg'?'egg':'non-veg'} · <b style="color:var(--ink)">${Math.round(d.p)} g protein · ${Math.round(d.f)} g fiber</b> per adult portion</div></div>
+    <div class="acts"><label for="ap${c.id}" hidden>Day</label><select id="ap${c.id}" data-apday="${c.id}">${DAYN.map((dn,k)=>`<option value="${k}">${dn}</option>`).join('')}</select>
+    <button class="btn" data-addplan="${c.id}">Put on plan</button><button class="btn" data-edit="${c.id}">Edit</button><button class="btn" data-del="${c.id}">Delete</button></div></article>`}).join('')}</div>`
+  :`<p class="muted" style="margin:0">Dishes you save show up here. They also join the swap rotation and future weekly plans, and their ingredients go onto the shopping list whenever they are planned.</p>`}</div>
+  <div style="display:grid;gap:12px"><h3 style="font-size:1.2rem">All dishes · ${DISHES.length}</h3>
+    <p class="small muted" style="margin:0">Every dish the planner can choose from. Turn off "Use in plans" for anything your family doesn't eat. Use "Copy & edit" to make your own version, for example with more dal.</p>
+    <div class="libtools"><label for="libq" hidden>Search dishes</label><input id="libq" type="search" placeholder="Search, e.g. dosa, paneer, ragi" value="${esc(LIB.q)}">
+      <span class="seg" role="group" aria-label="Meal">${[['all','All'],...SLOTS.map(x=>[x[0],x[1]])].map(([k,l])=>`<button data-libslot="${k}" aria-pressed="${LIB.slot===k}">${l}</button>`).join('')}</span></div>
+    <div class="lib" id="libList"></div></div>
+  </section>`;
+  renderLib();
+}
+const LIB={q:'',slot:'all'};
+function renderLib(){
+  const el=$('#libList');if(!el)return;const q=LIB.q.trim().toLowerCase();
+  const list=DISHES.filter(d=>(LIB.slot==='all'||d.slot===LIB.slot)&&(!q||(d.n+' '+d.note+' '+Object.keys(d.ing).map(k=>ING[k]?ING[k][0]:'').join(' ')).toLowerCase().includes(q)))
+    .sort((a,b)=>SLOTS.findIndex(x=>x[0]===a.slot)-SLOTS.findIndex(x=>x[0]===b.slot)||b.p-a.p);
+  el.innerHTML=list.length?list.map(d=>{const off=(S.hidden||[]).includes(d.id);const lbl=SLOTS.find(x=>x[0]===d.slot)[1];
+    const ings=Object.entries(d.ing).map(([k,v])=>{const i=ING[k];if(!i)return '';if(k==='coconut')return `Grated coconut ${Math.round(v*250)} g`;return `${i[0].replace(/ \(.*\)/,'')} ${i[2]==='pc'?(Math.round(v*100)/100)+(v===1?' pc':' pcs'):Math.round(v)+' '+i[2]}`}).filter(Boolean).join(', ');
+    return `<article class="libd ${off?'off':''}"><h4>${esc(d.n)}</h4>
+    <div class="meta"><i style="display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--${d.slot})"></i>${lbl}<span class="pchip">${Math.round(d.p)} g protein</span><span class="fchip">${Math.round(d.f)} g fiber</span>${d.mine?'<span class="mytag">my dish</span>':''}${d.diet==='nonveg'?'<span class="tag nv">non-veg</span>':d.diet==='egg'?'<span class="tag">egg</span>':''}</div>
+    <p class="measure">${esc(measureOf(d))}</p><div class="ings">${esc(ings)}</div>
+    <div class="acts"><label for="lp${d.id}" hidden>Day</label><select id="lp${d.id}">${DAYN.map((dn,k)=>`<option value="${k}">${dn}</option>`).join('')}</select><button class="btn" data-libplan="${d.id}">Put on plan</button>
+      <button class="btn" data-copy="${d.id}">Copy &amp; edit</button>
+      <label class="toggle small" style="font-size:.8rem"><input type="checkbox" data-use="${d.id}" ${off?'':'checked'}> Use in plans</label></div></article>`}).join('')
+    :`<p class="muted">No dish matches "${esc(LIB.q)}". Add it yourself with the form above.</p>`;
+}
+function saveDraft(){
+  const msg=$('#formMsg');
+  if(!draft.n.trim()){msg.textContent='Give the dish a name.';$('#dn').focus();return}
+  const ing={};
+  for(const r of draft.rows){const q=parseFloat(r.q);if(!r.k||!(q>0))continue;
+    if(r.k==='__other'){const nm=(r.on||'').trim(),op=parseFloat(r.op);if(!nm||!(op>=0)){msg.textContent='Add a name and protein per 100 g for the extra ingredient.';return}
+      const key='x_'+nm.toLowerCase().replace(/[^a-z0-9]+/g,'_');const of=parseFloat(r.of);S.customIng[key]=[nm,'Other','g',op,500,nm.toLowerCase(),of>=0?of:0];ING[key]=S.customIng[key];ing[key]=(ing[key]||0)+q}
+    else ing[r.k]=(ing[r.k]||0)+q}
+  if(!Object.keys(ing).length){msg.textContent='Add at least one ingredient with an amount.';return}
+  const rec={id:draft.id||('c'+Date.now().toString(36)),slot:draft.slot,diet:draft.diet,n:draft.n.trim(),note:draft.note.trim()||'Family recipe.',ing};
+  const i=S.custom.findIndex(c=>c.id===rec.id); if(i>=0)S.custom[i]=rec; else S.custom.push(rec);
+  // a dish whose meal changed must leave its old slot in any plan
+  Object.values(S.weeks).forEach(w=>w.plan.forEach(day=>SLOTS.forEach(([s])=>{if(day[s]===rec.id&&s!==rec.slot)day[s]='__gone'})));
+  syncCustom();const edited=!!draft.id;draft=null;render();toast(edited?'Dish updated':'Dish saved');
+}
+CAT_ORDER.splice(CAT_ORDER.length-1,0,'Other');
+
+/* ---------- Kitchen measures (one adult portion, from raw weights) ---------- */
+function frac(x){const w=Math.floor(x+1e-9),r=x-w;const f=r<.125?'':r<.375?'¼':r<.625?'½':r<.875?'¾':'';const W=r>=.875?w+1:w;return (W?W:'')+(f&&W?f:f)||'0'}
+function plural(n,one,many){return n===1?one:many}
+const MEASURE={b3:'2 ragi dosas · 2 tbsp chutney · 1 small katori curd',b4:'2 adais · 1 katori avial',d22:'2 adais · 1 katori avial',b7:'1 cup pongal · 2 tbsp chutney',
+ b23:'1 cup pongal · ½ katori sambar',s5:'1 glass ragi malt',s7:'1 handful makhana · 1 glass buttermilk',s12:'2 vadas · 1 tbsp chutney',d24:'2 ragi dosas · ¾ katori soya kurma',
+ d32:'2 millet dosas · 100 g fish (2 pieces)',b21:'2 kambu dosas · 2 tbsp chutney',d9:'¾ cup rice · 1 big bowl curd · ¾ katori sundal',s20:'1 glass buttermilk · 1 handful dalia',
+ s26:'1 egg bonda',s25:'3 dhokla pieces',b20:'1 glass ragi kanji',s14:'1 chikki bar · ¾ glass milk',l5:'1 cup jeera rice · 60 g paneer (~8 cubes) · 1 small katori curd',
+ l7:'1 cup lemon rice · ¾ katori sundal · 1 small katori curd',l15:'1 cup puliyogare · 1 katori curd',l29:'1 cup jeera rice · 2 eggs · 1 small katori curd',
+ l14:'1 cup biryani · ½ katori soya · 1 small katori raita',l30:'1 cup biryani · 110 g chicken (5–6 pieces) · 1 small katori raita',l25:'1 cup pulao · 60 g paneer (~8 cubes) · 1 small katori raita',
+ l6:'1½ cups bisi bele bath · 1 small katori raita',l28:'1½ cups bisi bele bath · 1 small katori raita',l26:'1 cup lemon rice · 1 katori rajma salad',l22:'1 cup curd rice · 1 tbsp paruppu podi',
+ s17:'1 katori Greek yogurt · 1 banana',s8:'1 banana · 1 handful almonds · 1 glass milk',s4:'1 handful (40 g)',s18:'1 handful (40 g)'};
+function measureOf(d){
+  if(MEASURE[d.id])return MEASURE[d.id];
+  const g=k=>d.ing[k]||0, nm=d.n.toLowerCase(), out=[];
+  const has=re=>re.test(nm);
+  const batter=g('idli_rice')+g('urad')+g('poha')*(g('idli_rice')?1:0)+(g('idli_rice')?g('ragi')+g('kambu'):0)+(g('millet')&&g('urad')?g('millet'):0);
+  let usedRagi=g('idli_rice')>0, usedKambu=g('idli_rice')>0, usedMillet=g('millet')&&g('urad');
+  // Batter-based
+  if(batter){
+    if(has(/vada/)&&has(/idli/)){out.push('2 idlis + 1 vada')}
+    else if(has(/idli/)){out.push(`${Math.round(batter/20)} idlis`)}
+    else if(has(/paniyaram/)){out.push(`${Math.round(batter/8)} paniyarams`)}
+    else if(has(/uttapam/)){out.push(`${Math.max(1,Math.round(batter/45))} uttapam${Math.round(batter/45)>1?'s':''}`)}
+    else if(has(/set dosa/)){out.push(`${Math.round(batter/30)} set dosas`)}
+    else if(has(/dosa/)){const n=Math.max(1,Math.round(batter/40));out.push(`${n} ${plural(n,'dosa','dosas')}`)}
+    else out.push(`${Math.round(batter/20)} idlis`);
+  } else if(g('urad')>=25&&has(/vada/)){out.push(`${Math.round(g('urad')/15)} vadas`)}
+  // Wheat
+  if(g('atta')){const a=g('atta');
+    if(has(/paratha/))out.push(`${Math.round(a/60)||1} paratha`);
+    else if(has(/poori/))out.push(`${Math.round(a/20)} pooris`);
+    else if(has(/dosa/)&&!batter)out.push(`${Math.round(a/30)} wheat dosas`);
+    else out.push(`${Math.round(a/35)} chapatis`)}
+  if(g('jowar'))out.push(`${Math.round(g('jowar')/35)} jowar rotis`);
+  if(g('bread'))out.push(`${g('bread')} bread slices`);
+  // Ragi / millets
+  if(g('ragi')&&!usedRagi){const r=g('ragi');
+    if(has(/mudde/))out.push('1 ragi ball (fist size)');else if(has(/malt|kanji|cookies/))out.push(has(/cookies/)?'2 ragi cookies':'1 glass');
+    else if(has(/puttu/))out.push('1 cup puttu');else if(has(/dosa/)){const n=Math.max(1,Math.round((r+g('urad'))/32));out.push(`${n} ragi dosas`)}else out.push(`${r} g ragi`)}
+  if(g('kambu')&&!usedKambu){if(has(/dosa/))out.push(`${Math.round((g('kambu')+g('idli_rice')+g('urad'))/35)} kambu dosas`);else out.push('1 cup kambu sadam')}
+  // Rice-type grains
+  const rice=g('rice')+g('kerala_rice')+g('brown_rice')+g('quinoa')+(usedMillet?0:g('millet'));
+  if(rice&&!batter){
+    if(has(/appam/))out.push(`${Math.max(2,Math.round(g('rice')/25))} appams`);
+    else if(has(/pesarattu|adai/)){/* rice is part of the dosa batter */}
+    else if(has(/upma/)&&g('millet'))out.push('1 plate upma');
+    else out.push(`${frac(rice/75)} cup cooked ${has(/biryani|pulao|bisi|puliyogare|lemon|jeera|pongal|curd rice|thayir/)?'':'rice'}`.trim().replace(/cup cooked$/,'cup'))}
+  if(g('rice_flour')&&!g('rava')){if(has(/idiyappam/))out.push(`${Math.round(g('rice_flour')/20)} idiyappams`);else if(has(/kozhukattai/))out.push(`${Math.round(g('rice_flour')/10)} kozhukattais`)}
+  if(g('rava')||g('poha')&&!batter||g('vermicelli')||g('oats')||g('wheat_rava')){
+    if(has(/rava dosa/))out.push(`${Math.round((g('rava')+g('rice_flour'))/35)} rava dosas`);
+    else if(has(/idli/)&&g('oats'))out.push(`${Math.round((g('oats')+g('rava'))/14)} oats idlis`);
+    else out.push('1 plate (about 1½ cups)')}
+  if(g('besan')){if(has(/chilla/))out.push(`${Math.round(g('besan')/25)} chillas`);else if(has(/dhokla/))out.push('3 dhokla pieces');else if(has(/bonda/)){}}
+  // Pesarattu / adai from legumes
+  if(has(/pesarattu/))out.push(`${Math.round(g('green_gram')/25)||1} pesarattu`);
+  if(has(/adai/)){const n=Math.round((g('rice')+g('toor')+g('chana_dal')+g('urad')+g('moong'))/40);out.push(`${n} adais`)}
+  // Dal / gravy
+  const dal=has(/adai|pesarattu|pongal/)?0:g('toor')+g('moong')+g('masoor')+(has(/usili/)?0:g('chana_dal')>=20?g('chana_dal'):0);
+  if(dal>=10){const k=dal/30;const label=has(/sambar|bisi/)?'sambar':has(/rasam/)&&dal<20?'rasam':has(/kootu/)?'kootu':has(/saaru/)?'saaru':'dal';
+    out.push(label==='rasam'?'1 cup rasam':`${frac(Math.max(.5,k))} katori ${label}`)}
+  if(has(/pongal/))out.push('1 cup pongal');
+  if(has(/usili/))out.push('1 katori usili');
+  // Legumes cooked
+  const leg=g('kabuli')+g('black_chana')+g('rajma')+g('horsegram')+g('cowpea')+(has(/pesarattu/)?0:g('green_gram'))+g('sprouts_pack')*.4;
+  if(leg){const k=leg/35;out.push(`${frac(Math.max(.5,k))} katori ${has(/sundal/)?'sundal':has(/sprout|chaat|salad/)?'sprouts':has(/rasam/)?'kollu rasam':'curry'}`)}
+  if(g('soya'))out.push(`${frac(Math.max(.25,g('soya')/40))} katori soya`);
+  if(g('tofu'))out.push(`${g('tofu')} g tofu (½ block)`);
+  if(g('paneer'))out.push(`${g('paneer')} g paneer (~${Math.round(g('paneer')/8)} cubes)`);
+  if(g('mushroom'))out.push('1 katori mushroom');
+  const meat=g('chicken')+g('mutton')+g('fish')+g('prawns')+g('sardine')+g('crab');
+  if(meat)out.push(`${meat} g ${g('fish')||g('sardine')?'fish (2 pieces)':g('prawns')?'prawns (~8)':g('mutton')?'mutton (5–6 pieces)':'chicken (5–6 pieces)'}`);
+  if(g('egg')){const e=g('egg');out.push(e===1?'1 egg':e<1?'½ egg':`${frac(e)} eggs`)}
+  // Veg side
+  const veg=['potato','carrot','beans','cabbage','brinjal','okra','spinach','capsicum','cauliflower','beetroot','bottle_gourd','pumpkin','sweet_potato','corn','ash_gourd','snake_gourd','chow_chow','broad_beans','colocasia','peas'].reduce((a,k)=>a+g(k),0);
+  if(veg>=60&&!has(/sundal|chaat/))out.push(`${frac(Math.min(1.5,Math.max(.5,veg/90)))} katori ${has(/kurma|stew|sagu/)?'kurma':has(/masala/)&&g('potato')?'potato masala':has(/kootu/)&&!dal?'kootu':'vegetables'}`);
+  else if(has(/corn/))out.push('1 cup');
+  // Chutney / nuts
+  const chut=(g('peanut')<=15?g('peanut'):0)+(g('roasted_chana')<=20?g('roasted_chana'):0);
+  if(chut&&has(/chutney|idli|dosa|uttapam|pongal|vada|paniyaram|kozhukattai/))out.push(`${Math.max(1,Math.round(chut/7))} tbsp chutney`);
+  else if(g('peanut')+g('roasted_chana')+g('almond')+g('walnut')+g('makhana')>=15)out.push('1 handful');
+  // Dairy
+  const curd=g('curd')+g('greek_yogurt')+g('hung_curd');
+  if(curd>=30){out.push(curd>=180?'1 big bowl curd':curd>=130?'1 katori curd':curd>=80?'1 small katori curd':'2 tbsp curd')}
+  if(g('milk'))out.push(`${g('milk')>=200?'1 glass':'¾ glass'} milk`);
+  if(g('buttermilk'))out.push('1 glass buttermilk');
+  if(g('banana'))out.push(`${g('banana')} banana`);
+  if(g('dates'))out.push('3 dates');
+  return [...new Set(out)].filter(Boolean).slice(0,5).join(' · ');
+}
+
+/* ---------- Share & print ---------- */
+const CAN_PRINT=(()=>{try{return window.self===window.top}catch(e){return false}})();
+function planText(){
+  const plan=week().plan,m=monday(S.week),end=new Date(m);end.setDate(m.getDate()+6);
+  const short=n=>n.length>28?n.split(/,| & | with /)[0].trim():n;
+  return `*Vaaram week plan* · ${fmt(m,{day:'numeric',month:'short'})} to ${fmt(end,{day:'numeric',month:'short'})}\n_Breakfast / Lunch / Snack / Dinner_\n\n`+
+    plan.map((d,i)=>`*${DAYN[i]}*: ${SLOTS.map(([s])=>short(BYID[d[s]].n)).join(' / ')}`).join('\n');
+}
+function buildPrint(){
+  const w=week(),plan=w.plan,m=monday(S.week),end=new Date(m);end.setDate(m.getDate()+6);
+  const all=plan.map((_,i)=>dayProtein(plan,i));const items=groceries();const byCat={};items.forEach(it=>(byCat[it.cat]=byCat[it.cat]||[]).push(it));
+  $('#printView').innerHTML=`<section class="pp">
+    <header><h1>Vaaram</h1><p>Week of ${fmt(m,{day:'numeric',month:'long'})} to ${fmt(end,{day:'numeric',month:'long',year:'numeric'})}</p></header>
+    <table class="pt"><thead><tr><th></th>${SLOTS.map(([,l,t])=>`<th>${l}<small>${t}</small></th>`).join('')}<th>Top-ups</th><th>Protein · fiber (g)</th></tr></thead><tbody>
+    ${plan.map((d,i)=>{const dd=new Date(m);dd.setDate(m.getDate()+i);const r=all[i];
+      return `<tr><th>${DAYN[i]}<small>${dd.getDate()}</small></th>${SLOTS.map(([s])=>{const x=BYID[d[s]];return `<td>${esc(x.n)}<small>${esc(measureOf(x))} · ${Math.round(x.p)} g protein · ${Math.round(x.f)} g fiber</small></td>`}).join('')}
+      <td class="tu">${r.filter(x=>x.items.some(it=>it.pick)).map(x=>`<div><b>${esc(x.person.name)}:</b> ${x.items.filter(it=>it.pick).map(it=>esc(it.n.split(',')[0].replace(/^(Glass|Bowl|Small bowl) of /,'').replace(/^./,c=>c.toUpperCase()))).join(', ')}</div>`).join('')||'—'}</td>
+      <td class="pr">${r.map(x=>`<div><span>${esc(x.person.name)}</span> ${Math.round(x.total)}/${x.person.target}${x.ok?'':'!'} · ${Math.round(x.fiber)}/${x.fgoal}${x.fok?'':'!'}</div>`).join('')}</td></tr>`}).join('')}
+    </tbody></table>
+    <p class="pfoot">Protein and fiber per adult portion are shown under each dish. Each person's total includes their portion size, top-ups, and any weekday eggs or morning milk set under Family.</p></section>
+    <section class="pp pb"><header><h1>Shopping list</h1><p>${items.length} items · ${fmt(m,{day:'numeric',month:'short'})} to ${fmt(end,{day:'numeric',month:'short'})}</p></header>
+    <div class="pcols">${CAT_ORDER.filter(c=>byCat[c]).map(c=>`<div class="pcat"><h2>${c}</h2>${byCat[c].sort((a,b)=>a.name.localeCompare(b.name)).map(it=>`<div class="pi"><span class="bx"></span><span>${esc(it.name)}</span><em>${it.unit?buyLabel(it):''}</em></div>`).join('')}</div>`).join('')}</div></section>`;
+}
+window.addEventListener('beforeprint',buildPrint);
+// Inside Claude the print dialog is blocked, so hand over a printable page instead
+async function savePrintable(){
+  let css='';for(const sh of document.styleSheets){let rules;try{rules=sh.cssRules}catch(e){continue}
+    for(const r of rules){if(r.media&&[...r.media].includes('print'))for(const x of r.cssRules)css+=x.cssText+'\n'}}
+  const m=monday(S.week);
+  const doc=`<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Vaaram week of ${fmt(m,{day:'numeric',month:'short'})}</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@700;800&family=DM+Sans:wght@400;600;700&display=swap">
+<style>:root{--font-display:"Plus Jakarta Sans",system-ui,sans-serif}body{margin:0;padding:16px;font-family:"DM Sans",system-ui,sans-serif;font-size:9.5pt;color:#111;background:#fff}
+.bar{display:flex;gap:10px;align-items:center;margin-bottom:12px;font-size:11pt}.bar button{font:inherit;font-weight:700;padding:8px 16px;border-radius:999px;border:0;background:#4f46e5;color:#fff;cursor:pointer}
+@media print{.bar{display:none}body{padding:0}}
+${css}</style></head><body><div class="bar"><button onclick="print()">Print or save as PDF</button><span>Landscape A4 · 2 pages</span></div>${$('#printView').innerHTML}
+<script>addEventListener('load',()=>setTimeout(()=>print(),400))<\/script></body></html>`;
+  const dl=window.claude&&window.claude.use?await window.claude.use('downloads').catch(()=>null):null;
+  if(!dl){toast('Printing is not available here');return}
+  try{await dl.save({filename:`vaaram-week-${keyOf(m)}.html`,data:doc});toast('Saved. Open the file to print or save as PDF')}
+  catch(e){if(e&&e.code!=='declined')toast('Could not save the printable page')}
+}
+
+function render(){
+  const m=monday(S.week),end=new Date(m);end.setDate(m.getDate()+6);
+  $('#weekLabel').textContent=`${fmt(m,{day:'numeric',month:'short'})} – ${fmt(end,{day:'numeric',month:'short'})}`;
+  document.querySelectorAll('.tab').forEach(t=>t.setAttribute('aria-selected',t.dataset.tab===S.tab));
+  const items=groceries(),w=week();$('#gcount').textContent=items.filter(it=>!w.checked[it.k]).length;
+  ({plan:renderPlan,protein:renderProtein,dishes:renderDishes,groceries:renderGroceries,family:renderFamily})[S.tab]();
+  save();
+}
+function toast(t){const el=$('#toast');el.textContent=t;el.hidden=false;clearTimeout(toast.h);toast.h=setTimeout(()=>el.hidden=true,1800)}
+async function copy(text,ok){try{await navigator.clipboard.writeText(text);toast(ok)}catch(e){toast('Copy did not work in this browser')}}
+
+/* ---------- Events ---------- */
+document.addEventListener('click',e=>{
+  const t=e.target.closest('button,td.cell'); if(!t) return;
+  if(t.dataset.tab){S.tab=t.dataset.tab;location.hash=t.dataset.tab;render();window.scrollTo({top:0});return}
+  if(t.id==='prevWeek'||t.id==='nextWeek'){S.week+=t.id==='prevWeek'?-1:1;S.day=null;render();return}
+  if(t.dataset.day!=null){S.day=+t.dataset.day;render();if(t.tagName==='TD')window.scrollTo({top:0,behavior:'smooth'});return}
+  if(t.dataset.swap){const s=t.dataset.swap,w=week(),day=w.plan[S.day];const pool=DISHES.filter(d=>d.slot===s&&allowed(d));if(!pool.length)return;
+    const used=new Set(w.plan.map(d=>d[s]));let idx=pool.findIndex(d=>d.id===day[s]);
+    for(let n=0;n<pool.length;n++){idx=(idx+1)%pool.length;if(!used.has(pool[idx].id)||n===pool.length-1)break}
+    day[s]=pool[idx].id;render();const el=$('#meal-'+s);if(el){el.classList.add('flip')}return}
+  if(t.id==='sharePlan'){const txt=planText();if(navigator.share){navigator.share({title:'Vaaram meal plan',text:txt}).catch(()=>{})}else copy(txt,'Week plan copied');return}
+  if(t.id==='printPlan'){buildPrint();if(CAN_PRINT)setTimeout(()=>window.print(),50);else savePrintable();return}
+  if(t.id==='reshuffle'){const k=keyOf(monday(S.week));S.weeks[k].plan=genPlan(Math.floor(Math.random()*1e9));render();toast('New week planned');return}
+  if(t.dataset.pantry){const n=t.dataset.pantry;S.pantry=S.pantry.includes(n)?S.pantry.filter(x=>x!==n):[...S.pantry,n];render();return}
+  if(t.id==='copyList'){copy(listText(groceries()),'List copied');return}
+  if(t.id==='shareList'){const txt='Groceries for the week\n'+listText(groceries());if(navigator.share){navigator.share({text:txt}).catch(()=>{})}else copy(txt,'List copied');return}
+  if(t.id==='clearChecks'){week().checked={};render();return}
+  if(t.dataset.nv!=null){S.set.nonveg=+t.dataset.nv;rebuild();return}
+  if(t.dataset.libslot){LIB.slot=t.dataset.libslot;document.querySelectorAll('[data-libslot]').forEach(b=>b.setAttribute('aria-pressed',b.dataset.libslot===LIB.slot));renderLib();return}
+  if(t.dataset.libplan){const id=t.dataset.libplan,d=BYID[id],day=+$('#lp'+id).value;week().plan[day][d.slot]=id;S.day=day;S.tab='plan';location.hash='plan';render();window.scrollTo({top:0});toast(`Added to ${DAYFULL[day]}`);return}
+  if(t.dataset.copy){const d=BYID[t.dataset.copy];draft={id:d.mine?null:null,n:d.n+(d.mine?' (copy)':' (my version)'),slot:d.slot,diet:d.diet,note:d.mine?d.note:'',
+    rows:Object.entries(d.ing).map(([k,q])=>k.startsWith('x_')?{k:'__other',q:String(q),on:ING[k][0],op:String(ING[k][3])}:{k,q:String(q)})};render();window.scrollTo({top:0,behavior:'smooth'});toast('Copied into the form. Change it and save.');return}
+  if(t.dataset.tpadd){const pid=t.dataset.tpadd,cur=topList(pid);const r=dayProtein(week().plan,S.day).find(x=>x.person.id===pid);const pref=(BOOSTS[r.person.boost]||BOOSTS.other).map(b=>b.id).find(id=>!cur.includes(id))||'curd150';setTops(pid,[...cur,pref]);return}
+  if(t.dataset.tpdel){const pid=t.dataset.tpdel,cur=topList(pid);cur.splice(+t.dataset.tpi,1);setTops(pid,cur);return}
+  if(t.dataset.topreset){const w=week();if(w.topups&&w.topups[S.day])delete w.topups[S.day][t.dataset.topreset];render();return}
+  if(t.id==='addRow'){draft.rows.push({k:'',q:''});render();const el=$('#ik'+(draft.rows.length-1));el&&el.focus();return}
+  if(t.dataset.delrow!=null){draft.rows.splice(+t.dataset.delrow,1);if(!draft.rows.length)draft.rows.push({k:'',q:''});render();return}
+  if(t.id==='cancelEdit'){draft=null;render();return}
+  if(t.dataset.edit){const c=S.custom.find(x=>x.id===t.dataset.edit);draft={id:c.id,n:c.n,slot:c.slot,diet:c.diet,note:c.note==='Family recipe.'?'':c.note,
+    rows:Object.entries(c.ing).map(([k,q])=>k.startsWith('x_')?{k:'__other',q:String(q),on:ING[k][0],op:String(ING[k][3])}:{k,q:String(q)})};render();window.scrollTo({top:0,behavior:'smooth'});return}
+  if(t.dataset.del){if(!t.dataset.armed){t.dataset.armed=1;t.textContent='Tap to confirm';return}
+    S.custom=S.custom.filter(c=>c.id!==t.dataset.del);syncCustom();render();toast('Dish deleted');return}
+  if(t.dataset.addplan){const id=t.dataset.addplan,d=BYID[id],day=+$('#ap'+id).value;week().plan[day][d.slot]=id;S.day=day;S.tab='plan';location.hash='plan';render();window.scrollTo({top:0});toast(`Added to ${DAYFULL[day]} ${SLOTS.find(x=>x[0]===d.slot)[1].toLowerCase()}`);return}
+  if(t.id==='addMember'){const p={id:'m'+Date.now().toString(36),name:'New member',age:30,sex:'f',weight:60,activity:'active',eggs:false,milk:false};Object.assign(p,suggest(p));S.people.push(p);render();const el=$('#mem-'+p.id);if(el){el.scrollIntoView({behavior:'smooth',block:'center'});const n=el.querySelector('input');n&&(n.focus(),n.select())}toast('Member added');return}
+  if(t.dataset.delmem){if(S.people.length<2)return;if(!t.dataset.armed){t.dataset.armed=1;t.textContent='Tap to confirm';return}const id=t.dataset.delmem;const n=S.people.find(x=>x.id===id).name;S.people=S.people.filter(x=>x.id!==id);render();toast(`${n} removed`);return}
+  if(t.dataset.usesug!=null){const p=S.people[+t.dataset.usesug];Object.assign(p,suggest(p));delete p.ftarget;render();return}
+  if(t.id==='resetAll'){if(t.dataset.armed){try{localStorage.removeItem(LS)}catch(e){}S=load();S.tab='family';render();toast('Reset done')}else{t.dataset.armed=1;t.textContent='Tap again to reset';$('#resetNote').textContent='This clears your swaps, ticks and family settings.'}return}
+});
+function rebuild(){const k=keyOf(monday(S.week));S.weeks[k]={plan:genPlan(hash(k+JSON.stringify([S.set.eggs,S.set.nonveg]))),checked:{}};render();toast('Plan rebuilt for this week')}
+function topList(pid){return dayProtein(week().plan,S.day).find(r=>r.person.id===pid).items.filter(it=>it.pick).map(it=>it.id).filter(Boolean)}
+function setTops(pid,list){const w=week();w.topups=w.topups||{};w.topups[S.day]=w.topups[S.day]||{};w.topups[S.day][pid]=list;render()}
+document.addEventListener('submit',e=>{if(e.target.id==='dishForm'){e.preventDefault();saveDraft()}});
+document.addEventListener('input',e=>{
+  const t=e.target;
+  if(t.id==='libq'){LIB.q=t.value;renderLib();return}
+  if(!draft) return;
+  if(t.dataset.d){draft[t.dataset.d]=t.value;return}
+  if(t.dataset.row!=null&&t.dataset.f!=='k'){const r=draft.rows[+t.dataset.row];r[t.dataset.f]=t.value;$('#pv'+t.dataset.row).textContent=pvText(r);$('#tally').innerHTML=tallyHTML()}
+});
+document.addEventListener('change',e=>{
+  const t=e.target;
+  if(t.dataset.use){const id=t.dataset.use;S.hidden=t.checked?S.hidden.filter(x=>x!==id):[...S.hidden,id];save();renderLib();return}
+  if(t.dataset.f==='k'){draft.rows[+t.dataset.row].k=t.value;render();const q=$('#iq'+t.dataset.row);q&&q.focus();return}
+  if(t.dataset.d||t.dataset.row!=null||t.dataset.apday)return;
+  if(t.dataset.tp){const pid=t.dataset.tp,cur=topList(pid);cur[+t.dataset.tpi]=t.value;setTops(pid,cur);return}
+  if(t.dataset.check){const w=week();if(t.checked)w.checked[t.dataset.check]=true;else delete w.checked[t.dataset.check];render();return}
+  if(t.id==='eggs'){S.set.eggs=t.checked;rebuild();return}
+  if(t.id==='vEggsInList'){S.set.vEggsInList=t.checked;render();return}
+  if(t.dataset.pf){const p=S.people[+t.dataset.i];const f=t.dataset.pf;
+    if(f==='name')p.name=t.value.trim()||p.name;
+    else if(f==='eggs'||f==='milk')p[f]=t.checked;
+    else if(['age','sex','weight','activity'].includes(f)){const before=suggest(p);p[f]=(f==='sex'||f==='activity')?t.value:(t.value===''?null:+t.value);const after=suggest(p);
+      if(p.target===before.target)p.target=after.target;if(p.mult===before.mult)p.mult=after.mult;p.boost=after.boost;p.basis=after.basis}
+    else p[f]=+t.value;
+    save();render()}
+});
+const TABS=['plan','protein','groceries','dishes','family'];
+function fromHash(){const h=location.hash.slice(1);if(TABS.includes(h))S.tab=h}
+window.addEventListener('hashchange',()=>{fromHash();render()});
+
+/* Kolam: dots with interlaced loops */
+
+syncCustom();fromHash();render();
+</script>
+<script>if('serviceWorker' in navigator&&location.protocol==='https:'){navigator.serviceWorker.register('sw.js').catch(()=>{})}</script>
+</body>
+</html>
